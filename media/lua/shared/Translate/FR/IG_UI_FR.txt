@@ -1,0 +1,18 @@
+IG_UI_FR = {
+	IGUI_BesoinIntime_Title = "Besoin intime",
+	IGUI_BesoinIntime_Stage0 = "Comblé(e)",
+	IGUI_BesoinIntime_Stage1 = "Serein(e)",
+	IGUI_BesoinIntime_Stage2 = "En manque",
+	IGUI_BesoinIntime_Stage3 = "Frustré(e)",
+	IGUI_BesoinIntime_Stage4 = "Très frustré(e)",
+	IGUI_BesoinIntime_Started = "Se détend...",
+	IGUI_BesoinIntime_Relieved = "Soulagé(e)",
+	IGUI_BesoinIntime_Interrupted = "Zombies à proximité !",
+	IGUI_BesoinIntime_NoDesire = "Pas d'envie pour le moment.",
+	IGUI_BesoinIntime_InVehicle = "Pas dans un véhicule.",
+	IGUI_BesoinIntime_ZombiesNear = "Des zombies sont trop proches.",
+	IGUI_BesoinIntime_NoPrivacy = "Quelqu'un d'autre est à proximité.",
+	IGUI_BesoinIntime_ProposalSent = "Proposition envoyée...",
+	IGUI_BesoinIntime_ProposalReceived = "%1 vous propose un moment intime. Accepter ?",
+	IGUI_BesoinIntime_Declined = "Proposition refusée.",
+}
