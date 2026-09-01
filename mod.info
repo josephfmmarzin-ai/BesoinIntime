@@ -1,4 +1,5 @@
 name=Besoin Intime
 id=BesoinIntime
 poster=poster.png
-description=Ajoute un besoin intime qui, une fois satisfait (seul ou avec un autre joueur), fait baisser le stress et la tristesse. Aucune animation, mecanique simple et discrete. Options Sandbox disponibles.
+modversion=1.1.0
+description=Ajoute un besoin intime qui, une fois satisfait (seul ou avec un autre joueur), fait baisser le stress et la tristesse. Aucune animation, mecanique simple et discrete. Options Sandbox disponibles. Compatible Build 41 et Build 42.

@@ -1,4 +1,4 @@
-BESOIN INTIME — mod Project Zomboid (Build 41)
+BESOIN INTIME — mod Project Zomboid (Build 41 et Build 42)
 ==============================================
 
 INSTALLATION
