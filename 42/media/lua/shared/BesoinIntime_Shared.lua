@@ -4,7 +4,7 @@
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "2.0.0"
+BI.VERSION   = "2.0.1"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
 BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'à la fin de la sérénité
@@ -21,6 +21,95 @@ function BI.opt(name, default)
     local sv = SandboxVars and SandboxVars.BesoinIntime
     if sv and sv[name] ~= nil then return sv[name] end
     return default
+end
+
+
+-- ---------------------------------------------------------------------------
+-- Textes de secours FR / EN (utilisés si les fichiers Translate ne sont pas chargés)
+-- ---------------------------------------------------------------------------
+BI.TEXTS = {
+    EN = {
+        ContextMenu_BesoinIntime_Title = "Intimate need",
+        ContextMenu_BesoinIntime_State = "State: %1 (%2 %%)",
+        ContextMenu_BesoinIntime_Relax = "Take some time for yourself",
+        ContextMenu_BesoinIntime_Propose = "Propose an intimate moment to %1",
+        ContextMenu_BesoinIntime_TogglePanel = "Show / hide gauge",
+        IGUI_BesoinIntime_Title = "Intimate need",
+        IGUI_BesoinIntime_Stage0 = "Satisfied",
+        IGUI_BesoinIntime_Stage1 = "Calm",
+        IGUI_BesoinIntime_Stage2 = "In the mood",
+        IGUI_BesoinIntime_Stage3 = "Frustrated",
+        IGUI_BesoinIntime_Stage4 = "Very frustrated",
+        IGUI_BesoinIntime_Calm = "Serene",
+        IGUI_BesoinIntime_Started = "Relaxing...",
+        IGUI_BesoinIntime_Relieved = "Relieved",
+        IGUI_BesoinIntime_Interrupted = "Zombies nearby!",
+        IGUI_BesoinIntime_NoDesire = "Not in the mood right now.",
+        IGUI_BesoinIntime_InVehicle = "Not in a vehicle.",
+        IGUI_BesoinIntime_NotIndoors = "Needs to be indoors.",
+        IGUI_BesoinIntime_NoBed = "Needs a bed or a couch nearby.",
+        IGUI_BesoinIntime_TooTired = "Too exhausted.",
+        IGUI_BesoinIntime_TooHungry = "Too hungry or thirsty.",
+        IGUI_BesoinIntime_ZombiesNear = "Zombies are too close.",
+        IGUI_BesoinIntime_NoPrivacy = "Someone else is nearby.",
+        IGUI_BesoinIntime_ProposalSent = "Proposal sent...",
+        IGUI_BesoinIntime_ProposalReceived = "%1 proposes an intimate moment. Accept?",
+        IGUI_BesoinIntime_Declined = "Proposal declined.",
+    },
+    FR = {
+        ContextMenu_BesoinIntime_Title = "Besoin intime",
+        ContextMenu_BesoinIntime_State = "État : %1 (%2 %%)",
+        ContextMenu_BesoinIntime_Relax = "Prendre un moment pour soi",
+        ContextMenu_BesoinIntime_Propose = "Proposer un moment intime à %1",
+        ContextMenu_BesoinIntime_TogglePanel = "Afficher / masquer la jauge",
+        IGUI_BesoinIntime_Title = "Besoin intime",
+        IGUI_BesoinIntime_Stage0 = "Comblé(e)",
+        IGUI_BesoinIntime_Stage1 = "Serein(e)",
+        IGUI_BesoinIntime_Stage2 = "En manque",
+        IGUI_BesoinIntime_Stage3 = "Frustré(e)",
+        IGUI_BesoinIntime_Stage4 = "Très frustré(e)",
+        IGUI_BesoinIntime_Calm = "Apaisé(e)",
+        IGUI_BesoinIntime_Started = "Se détend...",
+        IGUI_BesoinIntime_Relieved = "Soulagé(e)",
+        IGUI_BesoinIntime_Interrupted = "Zombies à proximité !",
+        IGUI_BesoinIntime_NoDesire = "Pas d'envie pour le moment.",
+        IGUI_BesoinIntime_InVehicle = "Pas dans un véhicule.",
+        IGUI_BesoinIntime_NotIndoors = "Il faut être à l'intérieur.",
+        IGUI_BesoinIntime_NoBed = "Il faut un lit ou un canapé à proximité.",
+        IGUI_BesoinIntime_TooTired = "Trop épuisé(e).",
+        IGUI_BesoinIntime_TooHungry = "Trop affamé(e) ou assoiffé(e).",
+        IGUI_BesoinIntime_ZombiesNear = "Des zombies sont trop proches.",
+        IGUI_BesoinIntime_NoPrivacy = "Quelqu'un d'autre est à proximité.",
+        IGUI_BesoinIntime_ProposalSent = "Proposition envoyée...",
+        IGUI_BesoinIntime_ProposalReceived = "%1 vous propose un moment intime. Accepter ?",
+        IGUI_BesoinIntime_Declined = "Proposition refusée.",
+    },
+}
+
+local function currentLang()
+    local ok, name = pcall(function()
+        if Translator and Translator.getLanguage then
+            local l = Translator.getLanguage()
+            if l and l.name then return tostring(l:name()) end
+        end
+        return nil
+    end)
+    if ok and name and name:upper():sub(1, 2) == "FR" then return "FR" end
+    return "EN"
+end
+
+-- Texte traduit, avec secours intégré si le fichier Translate est absent.
+function BI.T(key, ...)
+    local args = { ... }
+    local ok, txt = pcall(function() return getText(key, unpack(args)) end)
+    if ok and txt and txt ~= key and txt ~= "" then return txt end
+    local tbl = BI.TEXTS[currentLang()] or BI.TEXTS.EN
+    local s = tbl[key] or BI.TEXTS.EN[key] or key
+    s = s:gsub("%%%%", "%%")
+    for i, v in ipairs(args) do
+        s = s:gsub("%%" .. i, tostring(v))
+    end
+    return s
 end
 
 -- ---------------------------------------------------------------------------
@@ -44,7 +133,7 @@ function BI.getStage(need)
 end
 
 function BI.getStageName(player)
-    return getText("IGUI_BesoinIntime_Stage" .. BI.getStage(BI.getNeed(player)))
+    return BI.T("IGUI_BesoinIntime_Stage" .. BI.getStage(BI.getNeed(player)))
 end
 
 local function worldHours()
@@ -92,7 +181,16 @@ local function objectIsBed(obj)
         local props = obj:getProperties()
         return props ~= nil and props:Is(IsoFlagType.bed)
     end)
-    return ok and res == true
+    if ok and res == true then return true end
+    local ok2, byName = pcall(function()
+        if obj.isBed and obj:isBed() then return true end
+        local sprite = obj:getSprite()
+        local n = sprite and sprite:getName() or ""
+        n = string.lower(n)
+        return n:find("bedding") ~= nil or n:find("_bed") ~= nil or n:find("couch") ~= nil
+            or n:find("sofa") ~= nil or n:find("seating_indoor") ~= nil
+    end)
+    return ok2 and byName == true
 end
 BI.objectIsBed = objectIsBed
 
@@ -217,6 +315,6 @@ function BI.applyRelief(player, withPartner, bedQuality)
     player:getModData()[BI.KEY_CALM] = worldHours() + BI.opt("CalmHours", 3)
 
     if player.setHaloNote then
-        player:setHaloNote(getText("IGUI_BesoinIntime_Relieved"), 150, 255, 150, 400)
+        player:setHaloNote(BI.T("IGUI_BesoinIntime_Relieved"), 150, 255, 150, 400)
     end
 end

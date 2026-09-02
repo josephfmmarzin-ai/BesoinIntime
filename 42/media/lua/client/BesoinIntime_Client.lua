@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime — action, menu contextuel, panneau, multijoueur (client) — Build 42
+-- Besoin Intime 2.0.1 — action, menu contextuel, panneau, multijoueur (client) — Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -10,7 +10,7 @@ local BI = BesoinIntime
 
 local function halo(player, key, r, g, b)
     if player and player.setHaloNote then
-        player:setHaloNote(getText(key), r or 255, g or 200, b or 120, 300)
+        player:setHaloNote(BI.T(key), r or 255, g or 200, b or 120, 300)
     end
 end
 
@@ -82,13 +82,21 @@ end
 
 function BesoinIntimePanel:render()
     ISPanel.render(self)
+    local ok, err = pcall(self.renderInner, self)
+    if not ok and not self.loggedErr then
+        self.loggedErr = true
+        print("[BesoinIntime] panel render error: " .. tostring(err))
+    end
+end
+
+function BesoinIntimePanel:renderInner()
     local player = getPlayer()
     if not player then return end
     local need = BI.getNeed(player)
     local stage = BI.getStage(need)
-    local label = BI.isCalm(player) and getText("IGUI_BesoinIntime_Calm") or getText("IGUI_BesoinIntime_Stage" .. stage)
+    local label = BI.isCalm(player) and BI.T("IGUI_BesoinIntime_Calm") or BI.T("IGUI_BesoinIntime_Stage" .. stage)
 
-    self:drawText(getText("IGUI_BesoinIntime_Title"), 8, 4, 1, 1, 1, 1, UIFont.Small)
+    self:drawText(BI.T("IGUI_BesoinIntime_Title"), 8, 4, 1, 1, 1, 1, UIFont.Small)
     self:drawText(label, 8, 20, 0.9, 0.9, 0.9, 1, UIFont.Small)
 
     local bx, by, bw, bh = 8, 40, self.width - 16, 12
@@ -104,7 +112,7 @@ end
 
 function BI.createPanel()
     if BI.panel then return end
-    BI.panel = BesoinIntimePanel:new(getCore():getScreenWidth() - 200, 120, 180, 60)
+    BI.panel = BesoinIntimePanel:new(getCore():getScreenWidth() - 230, 120, 210, 60)
     BI.panel:initialise()
     BI.panel:addToUIManager()
     local player = getPlayer()
@@ -127,8 +135,14 @@ if keyBinding then
     table.insert(keyBinding, { value = "Toggle BesoinIntime Panel", key = Keyboard.KEY_J })
 end
 
+local function toggleKey()
+    local ok, k = pcall(function() return getCore():getKey("Toggle BesoinIntime Panel") end)
+    if ok and k and k ~= 0 then return k end
+    return Keyboard.KEY_J
+end
+
 Events.OnKeyPressed.Add(function(key)
-    if key == getCore():getKey("Toggle BesoinIntime Panel") then BI.togglePanel() end
+    if key == toggleKey() then BI.togglePanel() end
 end)
 
 -- ---------------------------------------------------------------------------
@@ -148,12 +162,22 @@ function BI.onPropose(player, other)
 end
 
 local function addTooltip(option, text)
-    local tip = ISWorldObjectContextMenu.addToolTip()
-    tip.description = text
-    option.toolTip = tip
+    local ok, tip = pcall(function()
+        if ISWorldObjectContextMenu and ISWorldObjectContextMenu.addToolTip then
+            return ISWorldObjectContextMenu.addToolTip()
+        end
+        local t = ISToolTip:new()
+        t:initialise()
+        t:setVisible(false)
+        return t
+    end)
+    if ok and tip then
+        tip.description = text
+        option.toolTip = tip
+    end
 end
 
-local function onFillWorldObjectContextMenu(playerNum, context, worldobjects, test)
+local function fillContextMenu(playerNum, context, worldobjects, test)
     if test then return end
     local player = getSpecificPlayer(playerNum)
     if not player or player:isDead() then return end
@@ -178,34 +202,38 @@ local function onFillWorldObjectContextMenu(playerNum, context, worldobjects, te
     end
     if not bed and #others == 0 then return end
 
-    local root = context:addOption(getText("ContextMenu_BesoinIntime_Title"))
+    local root = context:addOption(BI.T("ContextMenu_BesoinIntime_Title"))
     local sub = ISContextMenu:getNew(context)
     context:addSubMenu(root, sub)
 
-    local state = sub:addOption(getText("ContextMenu_BesoinIntime_State",
+    local state = sub:addOption(BI.T("ContextMenu_BesoinIntime_State",
         BI.getStageName(player), tostring(math.floor(BI.getNeed(player)))))
     state.notAvailable = true
 
     if bed then
-        local relax = sub:addOption(getText("ContextMenu_BesoinIntime_Relax"), player, BI.onRelax, bed)
+        local relax = sub:addOption(BI.T("ContextMenu_BesoinIntime_Relax"), player, BI.onRelax, bed)
         local ok, msg = BI.canRelax(player, nil, worldobjects)
         if not ok then
             relax.notAvailable = true
-            addTooltip(relax, getText(msg))
+            addTooltip(relax, BI.T(msg))
         end
     end
 
     for _, o in ipairs(others) do
         local name = o:getUsername() or o:getDescriptor():getForename()
-        local opt = sub:addOption(getText("ContextMenu_BesoinIntime_Propose", name), player, BI.onPropose, o)
+        local opt = sub:addOption(BI.T("ContextMenu_BesoinIntime_Propose", name), player, BI.onPropose, o)
         local ok, msg = BI.canRelax(player, o, nil)
         if not ok then
             opt.notAvailable = true
-            addTooltip(opt, getText(msg))
+            addTooltip(opt, BI.T(msg))
         end
     end
 
-    sub:addOption(getText("ContextMenu_BesoinIntime_TogglePanel"), nil, BI.togglePanel)
+    sub:addOption(BI.T("ContextMenu_BesoinIntime_TogglePanel"), nil, BI.togglePanel)
+end
+local function onFillWorldObjectContextMenu(playerNum, context, worldobjects, test)
+    local ok, err = pcall(fillContextMenu, playerNum, context, worldobjects, test)
+    if not ok then print("[BesoinIntime] context menu error: " .. tostring(err)) end
 end
 Events.OnFillWorldObjectContextMenu.Add(onFillWorldObjectContextMenu)
 
@@ -218,7 +246,7 @@ local function onServerCommand(module, command, args)
     if not player then return end
 
     if command == "proposal" then
-        local text = getText("IGUI_BesoinIntime_ProposalReceived", tostring(args.name))
+        local text = BI.T("IGUI_BesoinIntime_ProposalReceived", tostring(args.name))
         local w, h = 340, 130
         local modal = ISModalDialog:new(
             getCore():getScreenWidth() / 2 - w / 2, getCore():getScreenHeight() / 2 - h / 2,
