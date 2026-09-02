@@ -2,6 +2,9 @@
 
 🇫🇷 [Français](#français) · 🇬🇧 [English](#english)
 
+**Steam Workshop : https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776**  
+Workshop ID `3794394776` · Mod ID `BesoinIntime`
+
 ---
 
 ## Français
@@ -9,7 +12,7 @@
 Ajoute un **besoin intime réaliste** au personnage : une jauge cachée monte avec le temps et fait grimper le stress (moodle *Anxieux → Stressé*) puis la tristesse si elle est ignorée. On y répond **à l'intérieur, sur un lit ou un canapé**, seul ou avec un autre joueur en multijoueur. **Aucune animation, aucun contenu explicite** : une action chronométrée classique, discrète.
 
 ### Installation
-**Steam Workshop** (recommandé) : s'abonner au mod, puis l'activer dans le Mod Manager.
+**Steam Workshop** (recommandé) : [s'abonner au mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), puis l'activer dans le Mod Manager.
 
 **Manuelle** : télécharger `BesoinIntime-v2.0.0.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
 
@@ -50,7 +53,7 @@ common/                          # requis par Build 42
 Adds a **realistic intimate need**: a hidden gauge rises over time and increases stress (*Anxious → Stressed* moodle) and then unhappiness if ignored. Satisfy it **indoors, on a bed or couch**, alone or with another player in multiplayer. **No animation, no explicit content**: a regular, discreet timed action.
 
 ### Install
-**Steam Workshop** (recommended): subscribe, then enable it in the Mod Manager.
+**Steam Workshop** (recommended): [subscribe](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), then enable it in the Mod Manager.
 
 **Manual**: download `BesoinIntime-v2.0.0.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
 
