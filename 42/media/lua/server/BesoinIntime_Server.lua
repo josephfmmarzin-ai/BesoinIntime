@@ -1,10 +1,10 @@
--- BesoinIntime : relais des propositions entre joueurs (multijoueur)
+-- Besoin Intime — relais serveur des propositions entre joueurs (multijoueur)
 require "BesoinIntime_Shared"
 local BI = BesoinIntime
 
 if isServer() then
     local function onClientCommand(module, command, player, args)
-        if module ~= BI.MODULE then return end
+        if module ~= BI.MODULE or not args then return end
 
         if command == "propose" then
             local target = getPlayerByOnlineID(args.target)
@@ -17,7 +17,7 @@ if isServer() then
             local proposer = getPlayerByOnlineID(args.to)
             if proposer then
                 sendServerCommand(proposer, BI.MODULE, "answer",
-                    { accepted = args.accepted, name = player:getUsername() })
+                    { accepted = args.accepted == true, name = player:getUsername() })
             end
         end
     end

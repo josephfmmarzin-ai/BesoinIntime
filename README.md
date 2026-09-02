@@ -1,49 +1,84 @@
-# Besoin Intime — mod Project Zomboid (Build 41 et Build 42)
+# Besoin Intime / Intimate Need — Project Zomboid Build 42
 
-Ajoute un **besoin intime** au personnage : une jauge cachée qui monte avec le temps et fait grimper le stress (moodle *Anxieux → Stressé*) et la tristesse si elle est ignorée. La satisfaire — seul ou avec un autre joueur en multi — fait baisser stress, tristesse et ennui. **Aucune animation** : une simple action chronométrée, discrète.
+🇫🇷 [Français](#français) · 🇬🇧 [English](#english)
 
-## Compatibilité
-- **Build 42** (testé pour 42.20.x stable) : fichiers dans `42/` + `common/`, traductions UTF-8 avec `%%`.
-- **Build 41** (legacy) : fichiers à la racine (`mod.info`, `media/`).
-Le même dossier fonctionne sur les deux versions, chaque build lit sa partie.
+---
 
-## Installation
-1. Télécharger le zip de la [dernière release](../../releases/latest) (ou *Code → Download ZIP*).
-2. Dézipper et copier le dossier `BesoinIntime` dans `Zomboid/mods/` :  
-   Windows : `C:\Users\<toi>\Zomboid\mods\BesoinIntime\`  
-   Le dossier doit contenir `mod.info`, `42/`, `common/` et `media/`.
-3. Lancer le jeu → **Mods** (Build 42 : *Mod Manager*) → activer *Besoin Intime*.  
-   En multijoueur, le mod doit aussi être installé côté serveur.
+## Français
 
-## Utilisation
-- **Clic droit → Besoin intime** : état, *Se soulager* (seul), *Proposer un moment intime à …* (multi, l'autre joueur reçoit une fenêtre Oui/Non), afficher/masquer la jauge.
-- **Touche J** : afficher/masquer la jauge (modifiable dans *Options → Touches*). Le panneau se déplace à la souris.
+Ajoute un **besoin intime réaliste** au personnage : une jauge cachée monte avec le temps et fait grimper le stress (moodle *Anxieux → Stressé*) puis la tristesse si elle est ignorée. On y répond **à l'intérieur, sur un lit ou un canapé**, seul ou avec un autre joueur en multijoueur. **Aucune animation, aucun contenu explicite** : une action chronométrée classique, discrète.
 
-## Mécanique (valeurs par défaut)
+### Installation
+**Steam Workshop** (recommandé) : s'abonner au mod, puis l'activer dans le Mod Manager.
+
+**Manuelle** : télécharger `BesoinIntime-v2.0.0.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
+
+### Utilisation
+- **Clic droit sur un lit ou un canapé** (ou en étant juste à côté) → **Besoin intime** → *Prendre un moment pour soi*.
+- **Clic droit sur un autre joueur** (multi) → *Proposer un moment intime à …* ; il reçoit une fenêtre Oui / Non.
+- **Touche J** : afficher / masquer la jauge (modifiable dans *Options → Touches*). Le panneau se déplace à la souris.
+- Une option grisée affiche la raison au survol (dehors, pas de lit, zombies, épuisé, affamé, quelqu'un à proximité…).
+
+### Mécanique (valeurs par défaut, toutes réglables en Sandbox)
 | Élément | Valeur |
 |---|---|
-| Temps pour atteindre 100 % | 48 h de jeu |
-| Stress au-dessus de 50 % | +0.006 / 10 min à 100 % (proportionnel) |
-| Tristesse au-dessus de 75 % | +0.3 / 10 min |
-| Soulagement | stress −0.4, tristesse −15, ennui −10, panique −10, fatigue +0.04 |
-| Avec partenaire | effets ×1.5 |
-| Bloqué si | zombie à < 8 cases, dans un véhicule, besoin < 20 % |
+| Temps pour atteindre 100 % | 72 h de jeu |
+| Stress au-dessus de 50 % | jusqu'à +0.005 / 10 min |
+| Tristesse au-dessus de 75 % | jusqu'à +0.25 / 10 min |
+| Besoin minimum pour agir | 25 % |
+| Soulagement | stress −0.35, tristesse −12, ennui −10, panique −10, fatigue +0.05 |
+| Bon lit / mauvais lit | ×1.2 / ×0.8 |
+| Avec partenaire | ×1.5, action plus longue |
+| Sérénité après | 3 h de jeu sans montée |
+| Bloqué si | dehors, pas de lit, véhicule, fatigue > 85 %, faim/soif > 70 %, zombie < 10 cases, autre joueur < 8 cases |
 
-Tout est réglable dans **Options Sandbox → page « Besoin intime »**.
-
-## Structure
+### Structure
 ```
-mod.info, poster.png, media/       # Build 41 (traductions FR en Cp1252)
-42/mod.info, 42/poster.png, 42/media/   # Build 42 (traductions UTF-8, % écrit %%)
-common/                            # requis par Build 42, vide
-media/lua/shared/BesoinIntime_Shared.lua   # logique, effets, vérifications
-media/lua/client/BesoinIntime_Client.lua   # action, menu, panneau, multi côté client
-media/lua/server/BesoinIntime_Server.lua   # relais des propositions entre joueurs
+mod.info, poster.png            # métadonnées (Mod Manager / Workshop)
+42/mod.info, 42/media/          # code Build 42
+42/media/lua/shared/BesoinIntime_Shared.lua   # logique, vérifications, effets
+42/media/lua/client/BesoinIntime_Client.lua   # action, menu, panneau, multi (client)
+42/media/lua/server/BesoinIntime_Server.lua   # relais des propositions (serveur)
+42/media/lua/shared/Translate/{EN,FR}/        # traductions (UTF-8)
+common/                          # requis par Build 42
 ```
 
-## Historique
-- **1.1.0** — compatibilité Build 42 (42.20.x), dossier `42/` + `common/`, traductions UTF-8 et `%%`.
-- **1.0.0** — version initiale Build 41.
+---
 
-## Licence
-Libre d'utilisation et de modification.
+## English
+
+Adds a **realistic intimate need**: a hidden gauge rises over time and increases stress (*Anxious → Stressed* moodle) and then unhappiness if ignored. Satisfy it **indoors, on a bed or couch**, alone or with another player in multiplayer. **No animation, no explicit content**: a regular, discreet timed action.
+
+### Install
+**Steam Workshop** (recommended): subscribe, then enable it in the Mod Manager.
+
+**Manual**: download `BesoinIntime-v2.0.0.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
+
+### Usage
+- **Right-click a bed or couch** (or stand next to one) → **Intimate need** → *Take some time for yourself*.
+- **Right-click another player** (MP) → *Propose an intimate moment to …*; they get a Yes / No dialog.
+- **J key**: show / hide the gauge (rebindable in *Options → Keys*). The panel is draggable.
+- A greyed option shows the reason on hover (outdoors, no bed, zombies, exhausted, hungry, someone nearby…).
+
+### Mechanics (defaults, all tunable in Sandbox)
+| Item | Value |
+|---|---|
+| Time to reach 100 % | 72 in-game hours |
+| Stress above 50 % | up to +0.005 / 10 min |
+| Unhappiness above 75 % | up to +0.25 / 10 min |
+| Minimum need to act | 25 % |
+| Relief | stress −0.35, unhappiness −12, boredom −10, panic −10, fatigue +0.05 |
+| Good / bad bed | ×1.2 / ×0.8 |
+| With a partner | ×1.5, longer action |
+| Serenity afterwards | 3 in-game hours without gain |
+| Blocked if | outdoors, no bed, vehicle, fatigue > 85 %, hunger/thirst > 70 %, zombie < 10 tiles, other player < 8 tiles |
+
+---
+
+## Changelog
+- **2.0.0** — Final version, Build 42 only (42.20.x). Realistic mode: indoors + bed/couch, bed quality, exhaustion/hunger checks, privacy on by default, serenity period. Context menu only on beds / players. FR + EN. Workshop-ready.
+- **1.1.0** — Build 42 compatibility layer.
+- **1.0.0** — Initial Build 41 release.
+
+## License
+Free to use and modify. / Libre d'utilisation et de modification.

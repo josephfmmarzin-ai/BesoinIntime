@@ -1,7 +1,0 @@
-ContextMenu_EN = {
-	ContextMenu_BesoinIntime_Title = "Intimate need",
-	ContextMenu_BesoinIntime_State = "State: %1 (%2 %)",
-	ContextMenu_BesoinIntime_Relax = "Relieve yourself",
-	ContextMenu_BesoinIntime_Propose = "Propose an intimate moment to %1",
-	ContextMenu_BesoinIntime_TogglePanel = "Show / hide gauge",
-}

@@ -1,4 +1,6 @@
--- BesoinIntime : action, menu contextuel, panneau et multijoueur (cote client) - Build 42
+-- ===========================================================================
+-- Besoin Intime — action, menu contextuel, panneau, multijoueur (client) — Build 42
+-- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
 require "ISUI/ISPanel"
@@ -6,9 +8,15 @@ require "ISUI/ISModalDialog"
 
 local BI = BesoinIntime
 
----------------------------------------------------------------------------
--- Action chronometree (aucune animation, juste une barre de progression)
----------------------------------------------------------------------------
+local function halo(player, key, r, g, b)
+    if player and player.setHaloNote then
+        player:setHaloNote(getText(key), r or 255, g or 200, b or 120, 300)
+    end
+end
+
+-- ---------------------------------------------------------------------------
+-- Action chronométrée (aucune animation, barre de progression standard)
+-- ---------------------------------------------------------------------------
 ISBesoinIntimeAction = ISBaseTimedAction:derive("ISBesoinIntimeAction")
 
 function ISBesoinIntimeAction:isValid()
@@ -18,17 +26,13 @@ end
 function ISBesoinIntimeAction:update()
     self.tick = (self.tick or 0) + 1
     if self.tick % 60 == 0 and BI.opt("ZombieCheck", true) and BI.zombieNear(self.character) then
-        if self.character.setHaloNote then
-            self.character:setHaloNote(getText("IGUI_BesoinIntime_Interrupted"), 255, 120, 120, 300)
-        end
+        halo(self.character, "IGUI_BesoinIntime_Interrupted", 255, 120, 120)
         self:forceStop()
     end
 end
 
 function ISBesoinIntimeAction:start()
-    if self.character.setHaloNote then
-        self.character:setHaloNote(getText("IGUI_BesoinIntime_Started"), 220, 180, 255, 200)
-    end
+    halo(self.character, "IGUI_BesoinIntime_Started", 220, 180, 255)
 end
 
 function ISBesoinIntimeAction:stop()
@@ -36,13 +40,14 @@ function ISBesoinIntimeAction:stop()
 end
 
 function ISBesoinIntimeAction:perform()
-    BI.applyRelief(self.character, self.withPartner)
+    BI.applyRelief(self.character, self.withPartner, self.bedQuality)
     ISBaseTimedAction.perform(self)
 end
 
-function ISBesoinIntimeAction:new(character, withPartner)
+function ISBesoinIntimeAction:new(character, withPartner, bedQuality)
     local o = ISBaseTimedAction.new(self, character)
     o.withPartner = withPartner
+    o.bedQuality = bedQuality
     o.stopOnWalk = true
     o.stopOnRun = true
     o.maxTime = BI.opt("DurationSeconds", 20) * 50
@@ -51,13 +56,17 @@ function ISBesoinIntimeAction:new(character, withPartner)
     return o
 end
 
-function BI.startAction(player, withPartner)
-    ISTimedActionQueue.add(ISBesoinIntimeAction:new(player, withPartner))
+function BI.startAction(player, withPartner, bed)
+    local quality = bed and BI.bedQuality(bed) or "averageBed"
+    if bed and bed:getSquare() and luautils and luautils.walkAdj then
+        luautils.walkAdj(player, bed:getSquare(), true)
+    end
+    ISTimedActionQueue.add(ISBesoinIntimeAction:new(player, withPartner, quality))
 end
 
----------------------------------------------------------------------------
--- Panneau (jauge) deplacable
----------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------
+-- Panneau (jauge), déplaçable
+-- ---------------------------------------------------------------------------
 BesoinIntimePanel = ISPanel:derive("BesoinIntimePanel")
 BI.panel = nil
 
@@ -77,9 +86,10 @@ function BesoinIntimePanel:render()
     if not player then return end
     local need = BI.getNeed(player)
     local stage = BI.getStage(need)
+    local label = BI.isCalm(player) and getText("IGUI_BesoinIntime_Calm") or getText("IGUI_BesoinIntime_Stage" .. stage)
 
     self:drawText(getText("IGUI_BesoinIntime_Title"), 8, 4, 1, 1, 1, 1, UIFont.Small)
-    self:drawText(getText("IGUI_BesoinIntime_Stage" .. stage), 8, 20, 0.9, 0.9, 0.9, 1, UIFont.Small)
+    self:drawText(label, 8, 20, 0.9, 0.9, 0.9, 1, UIFont.Small)
 
     local bx, by, bw, bh = 8, 40, self.width - 16, 12
     self:drawRect(bx, by, bw, bh, 0.8, 0.15, 0.15, 0.15)
@@ -89,19 +99,17 @@ function BesoinIntimePanel:render()
     elseif stage == 4 then r, g, b = 0.9, 0.25, 0.25 end
     self:drawRect(bx, by, bw * (need / 100), bh, 0.9, r, g, b)
     self:drawRectBorder(bx, by, bw, bh, 1, 0.6, 0.6, 0.6)
-    self:drawText(math.floor(need) .. " %", bx + bw / 2 - 12, by - 1, 1, 1, 1, 1, UIFont.Small)
+    self:drawText(tostring(math.floor(need)) .. " %", bx + bw / 2 - 12, by - 1, 1, 1, 1, 1, UIFont.Small)
 end
 
 function BI.createPanel()
     if BI.panel then return end
-    local x = getCore():getScreenWidth() - 200
-    local y = 120
-    BI.panel = BesoinIntimePanel:new(x, y, 180, 60)
+    BI.panel = BesoinIntimePanel:new(getCore():getScreenWidth() - 200, 120, 180, 60)
     BI.panel:initialise()
     BI.panel:addToUIManager()
     local player = getPlayer()
     local visible = player and player:getModData()[BI.PANEL_KEY]
-    if visible == nil then visible = true end
+    if visible == nil then visible = BI.opt("PanelDefault", true) end
     BI.panel:setVisible(visible)
 end
 
@@ -113,43 +121,36 @@ function BI.togglePanel()
     if player then player:getModData()[BI.PANEL_KEY] = v end
 end
 
----------------------------------------------------------------------------
--- Raccourci clavier (Options > Touches > Besoin intime)
----------------------------------------------------------------------------
+-- Raccourci (Options > Touches > Besoin intime)
 if keyBinding then
     table.insert(keyBinding, { value = "[BesoinIntime]", key = nil })
     table.insert(keyBinding, { value = "Toggle BesoinIntime Panel", key = Keyboard.KEY_J })
 end
 
-local function onKeyPressed(key)
-    if key == getCore():getKey("Toggle BesoinIntime Panel") then
-        BI.togglePanel()
-    end
-end
-Events.OnKeyPressed.Add(onKeyPressed)
+Events.OnKeyPressed.Add(function(key)
+    if key == getCore():getKey("Toggle BesoinIntime Panel") then BI.togglePanel() end
+end)
 
----------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------
 -- Menu contextuel
----------------------------------------------------------------------------
-local function showBlocked(player, msgKey)
-    if player.setHaloNote then
-        player:setHaloNote(getText(msgKey), 255, 200, 120, 300)
-    end
-end
-
-function BI.onRelax(player)
-    local ok, msg = BI.canRelax(player, nil)
-    if not ok then showBlocked(player, msg); return end
-    BI.startAction(player, false)
+-- ---------------------------------------------------------------------------
+function BI.onRelax(player, bed)
+    local ok, msg, foundBed = BI.canRelax(player, nil, nil)
+    if not ok then halo(player, msg); return end
+    BI.startAction(player, false, bed or foundBed)
 end
 
 function BI.onPropose(player, other)
-    local ok, msg = BI.canRelax(player, other)
-    if not ok then showBlocked(player, msg); return end
+    local ok, msg = BI.canRelax(player, other, nil)
+    if not ok then halo(player, msg); return end
     sendClientCommand(player, BI.MODULE, "propose", { target = other:getOnlineID() })
-    if player.setHaloNote then
-        player:setHaloNote(getText("IGUI_BesoinIntime_ProposalSent"), 220, 180, 255, 300)
-    end
+    halo(player, "IGUI_BesoinIntime_ProposalSent", 220, 180, 255)
+end
+
+local function addTooltip(option, text)
+    local tip = ISWorldObjectContextMenu.addToolTip()
+    tip.description = text
+    option.toolTip = tip
 end
 
 local function onFillWorldObjectContextMenu(playerNum, context, worldobjects, test)
@@ -162,34 +163,45 @@ local function onFillWorldObjectContextMenu(playerNum, context, worldobjects, te
         if obj and obj:getSquare() then square = obj:getSquare(); break end
     end
 
-    local root = context:addOption(getText("ContextMenu_BesoinIntime_Title"))
-    local sub = ISContextMenu:getNew(context)
-    context:addSubMenu(root, sub)
-
-    -- Etat (non cliquable)
-    local state = sub:addOption(getText("ContextMenu_BesoinIntime_State",
-        BI.getStageName(player), tostring(math.floor(BI.getNeed(player)))))
-    state.notAvailable = true
-
-    -- Seul
-    local relax = sub:addOption(getText("ContextMenu_BesoinIntime_Relax"), player, BI.onRelax)
-    local ok, msg = BI.canRelax(player, nil)
-    if not ok then
-        relax.notAvailable = true
-        local tip = ISWorldObjectContextMenu.addToolTip()
-        tip.description = getText(msg)
-        relax.toolTip = tip
-    end
-
-    -- Avec un autre joueur (multi uniquement)
+    -- Le menu n'apparaît que sur un lit/canapé cliqué, à côté d'un lit,
+    -- ou sur un autre joueur (multi).
+    local bed = BI.findBed(player, worldobjects)
+    local others = {}
     if isClient() and square then
         local movers = square:getMovingObjects()
         for i = 0, movers:size() - 1 do
             local o = movers:get(i)
             if instanceof(o, "IsoPlayer") and o ~= player and not o:isDead() then
-                local name = o:getUsername() or o:getDescriptor():getForename()
-                sub:addOption(getText("ContextMenu_BesoinIntime_Propose", name), player, BI.onPropose, o)
+                table.insert(others, o)
             end
+        end
+    end
+    if not bed and #others == 0 then return end
+
+    local root = context:addOption(getText("ContextMenu_BesoinIntime_Title"))
+    local sub = ISContextMenu:getNew(context)
+    context:addSubMenu(root, sub)
+
+    local state = sub:addOption(getText("ContextMenu_BesoinIntime_State",
+        BI.getStageName(player), tostring(math.floor(BI.getNeed(player)))))
+    state.notAvailable = true
+
+    if bed then
+        local relax = sub:addOption(getText("ContextMenu_BesoinIntime_Relax"), player, BI.onRelax, bed)
+        local ok, msg = BI.canRelax(player, nil, worldobjects)
+        if not ok then
+            relax.notAvailable = true
+            addTooltip(relax, getText(msg))
+        end
+    end
+
+    for _, o in ipairs(others) do
+        local name = o:getUsername() or o:getDescriptor():getForename()
+        local opt = sub:addOption(getText("ContextMenu_BesoinIntime_Propose", name), player, BI.onPropose, o)
+        local ok, msg = BI.canRelax(player, o, nil)
+        if not ok then
+            opt.notAvailable = true
+            addTooltip(opt, getText(msg))
         end
     end
 
@@ -197,51 +209,53 @@ local function onFillWorldObjectContextMenu(playerNum, context, worldobjects, te
 end
 Events.OnFillWorldObjectContextMenu.Add(onFillWorldObjectContextMenu)
 
----------------------------------------------------------------------------
--- Multijoueur : reception des propositions / reponses
----------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------
+-- Multijoueur : réception des propositions / réponses
+-- ---------------------------------------------------------------------------
 local function onServerCommand(module, command, args)
-    if module ~= BI.MODULE then return end
+    if module ~= BI.MODULE or not args then return end
     local player = getPlayer()
     if not player then return end
 
     if command == "proposal" then
-        local text = getText("IGUI_BesoinIntime_ProposalReceived", args.name)
-        local w, h = 320, 120
+        local text = getText("IGUI_BesoinIntime_ProposalReceived", tostring(args.name))
+        local w, h = 340, 130
         local modal = ISModalDialog:new(
             getCore():getScreenWidth() / 2 - w / 2, getCore():getScreenHeight() / 2 - h / 2,
             w, h, text, true, nil,
             function(_, button)
                 local accepted = (button.internal == "YES")
+                local bed = nil
                 if accepted then
-                    local ok, msg = BI.canRelax(player, nil)
-                    if not ok then showBlocked(player, msg); accepted = false end
+                    local ok, msg, foundBed = BI.canRelax(player, nil, nil)
+                    if not ok then halo(player, msg); accepted = false end
+                    bed = foundBed
                 end
                 sendClientCommand(player, BI.MODULE, "answer", { to = args.from, accepted = accepted })
-                if accepted then BI.startAction(player, true) end
+                if accepted then BI.startAction(player, true, bed) end
             end)
         modal:initialise()
         modal:addToUIManager()
 
     elseif command == "answer" then
         if args.accepted then
-            BI.startAction(player, true)
+            local _, _, bed = BI.canRelax(player, nil, nil)
+            BI.startAction(player, true, bed)
         else
-            showBlocked(player, "IGUI_BesoinIntime_Declined")
+            halo(player, "IGUI_BesoinIntime_Declined")
         end
     end
 end
 Events.OnServerCommand.Add(onServerCommand)
 
----------------------------------------------------------------------------
--- Tick toutes les 10 minutes de jeu
----------------------------------------------------------------------------
-local function everyTenMinutes()
+-- ---------------------------------------------------------------------------
+-- Tick 10 minutes de jeu + création du panneau
+-- ---------------------------------------------------------------------------
+Events.EveryTenMinutes.Add(function()
     for i = 0, getNumActivePlayers() - 1 do
         BI.tickPlayer(getSpecificPlayer(i))
     end
-end
-Events.EveryTenMinutes.Add(everyTenMinutes)
+end)
 
 Events.OnCreatePlayer.Add(function(playerNum)
     if playerNum == 0 then BI.createPanel() end
