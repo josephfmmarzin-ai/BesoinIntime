@@ -28,4 +28,10 @@ Sandbox_EN = {
 	Sandbox_BesoinIntime_RequirePrivacy_tooltip = "Block the action if another player (other than the partner) is within 8 tiles.",
 	Sandbox_BesoinIntime_PanelDefault = "Show gauge by default",
 	Sandbox_BesoinIntime_PanelDefault_tooltip = "Whether the gauge panel is visible when a character is created. Toggle with J.",
+	Sandbox_BesoinIntime_MoodleEnabled = "Show moodle icon",
+	Sandbox_BesoinIntime_MoodleEnabled_tooltip = "Round icon next to the vanilla moodles, visible from the 'In the mood' stage and during serenity. Draggable.",
+	Sandbox_BesoinIntime_SitPose = "Sit on the bed during the action",
+	Sandbox_BesoinIntime_SitPose_tooltip = "Uses the vanilla sitting pose. Disable to keep the character standing.",
+	Sandbox_BesoinIntime_SleepBonus = "Sleep bonus (fatigue per 10 min)",
+	Sandbox_BesoinIntime_SleepBonus_tooltip = "Extra fatigue recovered every 10 in-game minutes when sleeping during the serenity period.",
 }

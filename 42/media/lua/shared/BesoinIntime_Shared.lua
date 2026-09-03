@@ -4,12 +4,13 @@
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "2.1.0"
+BI.VERSION   = "2.2.0"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
 BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'à la fin de la sérénité
 BI.PANEL_KEY = "BesoinIntime_PanelVisible"
 BI.KEY_LAST  = "BesoinIntime_LastRelief"   -- heures-monde du dernier moment
+BI.MOODLE_POS_KEY = "BesoinIntime_MoodlePos"
 
 local function clamp(v, lo, hi)
     if v < lo then return lo elseif v > hi then return hi end
@@ -57,6 +58,10 @@ BI.TEXTS = {
         IGUI_BesoinIntime_ProposalSent = "Proposal sent...",
         IGUI_BesoinIntime_ProposalReceived = "%1 proposes an intimate moment. Accept?",
         IGUI_BesoinIntime_Declined = "Proposal declined.",
+        IGUI_BesoinIntime_MoodleCalm = "Serene. The need does not rise for a while, and sleep is more restful.",
+        IGUI_BesoinIntime_MoodleDesc2 = "In the mood. A bed or a couch, indoors, would do some good.",
+        IGUI_BesoinIntime_MoodleDesc3 = "Frustrated. Stress is building up. Find some privacy.",
+        IGUI_BesoinIntime_MoodleDesc4 = "Very frustrated. Stress and unhappiness keep rising.",
     },
     FR = {
         ContextMenu_BesoinIntime_Title = "Besoin intime",
@@ -86,6 +91,10 @@ BI.TEXTS = {
         IGUI_BesoinIntime_ProposalSent = "Proposition envoyée...",
         IGUI_BesoinIntime_ProposalReceived = "%1 vous propose un moment intime. Accepter ?",
         IGUI_BesoinIntime_Declined = "Proposition refusée.",
+        IGUI_BesoinIntime_MoodleCalm = "Apaisé(e). Le besoin ne remonte pas pendant un moment, et le sommeil est plus réparateur.",
+        IGUI_BesoinIntime_MoodleDesc2 = "En manque. Un lit ou un canapé, à l'intérieur, ferait du bien.",
+        IGUI_BesoinIntime_MoodleDesc3 = "Frustré(e). Le stress s'accumule. Trouvez un peu d'intimité.",
+        IGUI_BesoinIntime_MoodleDesc4 = "Très frustré(e). Le stress et la tristesse continuent de monter.",
     },
 }
 
@@ -154,7 +163,16 @@ end
 -- ---------------------------------------------------------------------------
 function BI.tickPlayer(player)
     if not player or player:isDead() then return end
-    if BI.isCalm(player) then return end
+    if BI.isCalm(player) then
+        -- Bonus de sommeil : si l'on dort pendant la période de sérénité, la fatigue tombe plus vite
+        local ok = pcall(function()
+            if player:isAsleep() then
+                local st = player:getStats()
+                st:setFatigue(clamp(st:getFatigue() - BI.opt("SleepBonus", 0.01), 0, 1))
+            end
+        end)
+        return
+    end
 
     local hours = BI.opt("HoursToFull", 72)
     local need = BI.getNeed(player) + 100 / (hours * 6)

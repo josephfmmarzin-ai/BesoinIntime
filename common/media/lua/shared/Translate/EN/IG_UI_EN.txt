@@ -20,4 +20,8 @@ IG_UI_EN = {
 	IGUI_BesoinIntime_ProposalSent = "Proposal sent...",
 	IGUI_BesoinIntime_ProposalReceived = "%1 proposes an intimate moment. Accept?",
 	IGUI_BesoinIntime_Declined = "Proposal declined.",
+	IGUI_BesoinIntime_MoodleCalm = "Serene. The need does not rise for a while, and sleep is more restful.",
+	IGUI_BesoinIntime_MoodleDesc2 = "In the mood. A bed or a couch, indoors, would do some good.",
+	IGUI_BesoinIntime_MoodleDesc3 = "Frustrated. Stress is building up. Find some privacy.",
+	IGUI_BesoinIntime_MoodleDesc4 = "Very frustrated. Stress and unhappiness keep rising.",
 }

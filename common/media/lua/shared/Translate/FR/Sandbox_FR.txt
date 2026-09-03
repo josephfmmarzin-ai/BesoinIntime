@@ -28,4 +28,10 @@ Sandbox_FR = {
 	Sandbox_BesoinIntime_RequirePrivacy_tooltip = "Bloque l'action si un autre joueur (hors partenaire) est à moins de 8 cases.",
 	Sandbox_BesoinIntime_PanelDefault = "Afficher la jauge par défaut",
 	Sandbox_BesoinIntime_PanelDefault_tooltip = "Jauge visible à la création du personnage. Touche J pour basculer.",
+	Sandbox_BesoinIntime_MoodleEnabled = "Afficher l'icône de moodle",
+	Sandbox_BesoinIntime_MoodleEnabled_tooltip = "Icône ronde à côté des moodles vanilla, visible à partir du palier « En manque » et pendant la sérénité. Déplaçable.",
+	Sandbox_BesoinIntime_SitPose = "S'asseoir sur le lit pendant l'action",
+	Sandbox_BesoinIntime_SitPose_tooltip = "Utilise la pose assise vanilla. Désactiver pour rester debout.",
+	Sandbox_BesoinIntime_SleepBonus = "Bonus de sommeil (fatigue par 10 min)",
+	Sandbox_BesoinIntime_SleepBonus_tooltip = "Fatigue supplémentaire récupérée toutes les 10 min de jeu en dormant pendant la période de sérénité.",
 }

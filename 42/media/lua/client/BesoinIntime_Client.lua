@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 2.1.0 — action, menu contextuel, panneau, multijoueur (client) — Build 42
+-- Besoin Intime 2.2.0 — action, menu contextuel, panneau, multijoueur (client) — Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -31,15 +31,25 @@ function ISBesoinIntimeAction:update()
     end
 end
 
+local function setSitting(character, on)
+    if not BI.opt("SitPose", true) then return end
+    pcall(function()
+        if character.setSitOnGround then character:setSitOnGround(on) end
+    end)
+end
+
 function ISBesoinIntimeAction:start()
+    setSitting(self.character, true)
     halo(self.character, "IGUI_BesoinIntime_Started", 220, 180, 255)
 end
 
 function ISBesoinIntimeAction:stop()
+    setSitting(self.character, false)
     ISBaseTimedAction.stop(self)
 end
 
 function ISBesoinIntimeAction:perform()
+    setSitting(self.character, false)
     BI.applyRelief(self.character, self.withPartner, self.bedQuality)
     ISBaseTimedAction.perform(self)
 end
@@ -58,8 +68,14 @@ end
 
 function BI.startAction(player, withPartner, bed)
     local quality = bed and BI.bedQuality(bed) or "averageBed"
-    if bed and bed:getSquare() and luautils and luautils.walkAdj then
-        luautils.walkAdj(player, bed:getSquare(), true)
+    if bed and bed:getSquare() then
+        -- Marcher jusque sur le lit (pose assise dessus), sinon à côté
+        local ok = pcall(function()
+            ISTimedActionQueue.add(ISWalkToTimedAction:new(player, bed:getSquare()))
+        end)
+        if not ok and luautils and luautils.walkAdj then
+            luautils.walkAdj(player, bed:getSquare(), true)
+        end
     end
     ISTimedActionQueue.add(ISBesoinIntimeAction:new(player, withPartner, quality))
 end
@@ -127,6 +143,93 @@ function BI.togglePanel()
     BI.panel:setVisible(v)
     local player = getPlayer()
     if player then player:getModData()[BI.PANEL_KEY] = v end
+end
+
+-- ---------------------------------------------------------------------------
+-- Moodle intégré (icône dans la colonne de droite, déplaçable, info-bulle)
+-- ---------------------------------------------------------------------------
+BesoinIntimeMoodle = ISPanel:derive("BesoinIntimeMoodle")
+BI.moodle = nil
+
+function BesoinIntimeMoodle:new(x, y)
+    local o = ISPanel:new(x, y, 32, 32)
+    setmetatable(o, self)
+    self.__index = self
+    o.backgroundColor = { r = 0, g = 0, b = 0, a = 0 }
+    o.borderColor = { r = 0, g = 0, b = 0, a = 0 }
+    o.moveWithMouse = true
+    o.textures = {
+        calm = getTexture("media/ui/BesoinIntime_moodle_calm.png"),
+        [2] = getTexture("media/ui/BesoinIntime_moodle_2.png"),
+        [3] = getTexture("media/ui/BesoinIntime_moodle_3.png"),
+        [4] = getTexture("media/ui/BesoinIntime_moodle_4.png"),
+    }
+    return o
+end
+
+function BesoinIntimeMoodle:currentKey(player)
+    if BI.isCalm(player) then return "calm" end
+    local stage = BI.getStage(BI.getNeed(player))
+    if stage >= 2 then return stage end
+    return nil
+end
+
+function BesoinIntimeMoodle:render()
+    local ok, err = pcall(self.renderInner, self)
+    if not ok and not self.loggedErr then
+        self.loggedErr = true
+        print("[BesoinIntime] moodle render error: " .. tostring(err))
+    end
+end
+
+function BesoinIntimeMoodle:renderInner()
+    local player = getPlayer()
+    if not player or not BI.opt("MoodleEnabled", true) then return end
+    local key = self:currentKey(player)
+    if not key then return end
+    local tex = self.textures[key]
+    if tex then self:drawTextureScaled(tex, 0, 0, 32, 32, 1, 1, 1, 1) end
+
+    if self:isMouseOver() then
+        local title = (key == "calm") and BI.T("IGUI_BesoinIntime_Calm") or BI.T("IGUI_BesoinIntime_Stage" .. key)
+        local desc = (key == "calm") and BI.T("IGUI_BesoinIntime_MoodleCalm") or BI.T("IGUI_BesoinIntime_MoodleDesc" .. key)
+        local w = math.max(getTextManager():MeasureStringX(UIFont.Small, desc), getTextManager():MeasureStringX(UIFont.Small, title)) + 16
+        local h = 44
+        local x = -w - 6
+        self:drawRect(x, 0, w, h, 0.85, 0.05, 0.05, 0.05)
+        self:drawRectBorder(x, 0, w, h, 0.9, 0.5, 0.5, 0.5)
+        self:drawText(title, x + 8, 4, 1, 1, 1, 1, UIFont.Small)
+        self:drawText(desc, x + 8, 22, 0.85, 0.85, 0.85, 1, UIFont.Small)
+    end
+end
+
+function BesoinIntimeMoodle:onMouseUp(x, y)
+    ISPanel.onMouseUp(self, x, y)
+    local player = getPlayer()
+    if player then
+        player:getModData()[BI.MOODLE_POS_KEY] = { x = self:getX(), y = self:getY() }
+    end
+end
+
+function BI.createMoodle()
+    if BI.moodle then return end
+    local sw = getCore():getScreenWidth()
+    local x, y = sw - 42, 420
+    -- Se placer juste sous la colonne de moodles vanilla si possible
+    pcall(function()
+        local ui = MoodlesUI.getInstance()
+        if ui then
+            x = ui:getX() + math.floor((ui:getWidth() - 32) / 2)
+            y = ui:getY() + ui:getHeight() + 6
+        end
+    end)
+    local player = getPlayer()
+    local saved = player and player:getModData()[BI.MOODLE_POS_KEY]
+    if saved and saved.x and saved.y then x, y = saved.x, saved.y end
+    BI.moodle = BesoinIntimeMoodle:new(x, y)
+    BI.moodle:initialise()
+    BI.moodle:addToUIManager()
+    BI.moodle:setVisible(true)
 end
 
 -- Raccourci (Options > Touches > Besoin intime)
@@ -283,5 +386,8 @@ Events.EveryTenMinutes.Add(function()
 end)
 
 Events.OnCreatePlayer.Add(function(playerNum)
-    if playerNum == 0 then BI.createPanel() end
+    if playerNum == 0 then
+        BI.createPanel()
+        BI.createMoodle()
+    end
 end)

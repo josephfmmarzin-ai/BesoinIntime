@@ -20,4 +20,8 @@ IG_UI_FR = {
 	IGUI_BesoinIntime_ProposalSent = "Proposition envoyée...",
 	IGUI_BesoinIntime_ProposalReceived = "%1 vous propose un moment intime. Accepter ?",
 	IGUI_BesoinIntime_Declined = "Proposition refusée.",
+	IGUI_BesoinIntime_MoodleCalm = "Apaisé(e). Le besoin ne remonte pas pendant un moment, et le sommeil est plus réparateur.",
+	IGUI_BesoinIntime_MoodleDesc2 = "En manque. Un lit ou un canapé, à l'intérieur, ferait du bien.",
+	IGUI_BesoinIntime_MoodleDesc3 = "Frustré(e). Le stress s'accumule. Trouvez un peu d'intimité.",
+	IGUI_BesoinIntime_MoodleDesc4 = "Très frustré(e). Le stress et la tristesse continuent de monter.",
 }

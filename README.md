@@ -14,12 +14,13 @@ Ajoute un **besoin intime réaliste** au personnage : une jauge cachée monte av
 ### Installation
 **Steam Workshop** (recommandé) : [s'abonner au mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), puis l'activer dans le Mod Manager.
 
-**Manuelle** : télécharger `BesoinIntime-v2.1.0.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
+**Manuelle** : télécharger `BesoinIntime-v2.2.0.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
 
 ### Utilisation
 - **Clic droit sur un lit ou un canapé** (ou en étant juste à côté) → **Besoin intime** → *Prendre un moment pour soi*.
 - **Clic droit sur un autre joueur** (multi) → *Proposer un moment intime à …* ; il reçoit une fenêtre Oui / Non.
-- **Touche J** : afficher / masquer la jauge (modifiable dans *Options → Touches*). Le panneau se déplace à la souris.
+- **Icône de moodle** dans la colonne de droite dès le palier « En manque » (jaune → rouge), verte pendant la sérénité ; survol = description ; déplaçable.
+- **Touche J** : afficher la jauge détaillée (masquée par défaut, modifiable dans *Options → Touches*).
 - Une option grisée affiche la raison au survol (dehors, pas de lit, zombies, épuisé, affamé, quelqu'un à proximité…).
 
 ### Mécanique (valeurs par défaut, toutes réglables en Sandbox)
@@ -55,12 +56,13 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 ### Install
 **Steam Workshop** (recommended): [subscribe](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), then enable it in the Mod Manager.
 
-**Manual**: download `BesoinIntime-v2.1.0.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
+**Manual**: download `BesoinIntime-v2.2.0.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
 
 ### Usage
 - **Right-click a bed or couch** (or stand next to one) → **Intimate need** → *Take some time for yourself*.
 - **Right-click another player** (MP) → *Propose an intimate moment to …*; they get a Yes / No dialog.
-- **J key**: show / hide the gauge (rebindable in *Options → Keys*). The panel is draggable.
+- **Moodle icon** in the right column from the 'In the mood' stage (yellow → red), green during serenity; hover for details; draggable.
+- **J key**: show the detailed gauge (hidden by default, rebindable in *Options → Keys*).
 - A greyed option shows the reason on hover (outdoors, no bed, zombies, exhausted, hungry, someone nearby…).
 
 ### Mechanics (defaults, all tunable in Sandbox)
@@ -79,6 +81,7 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 ---
 
 ## Changelog
+- **2.2.0** — Built-in moodle icon in the right column (from the 'In the mood' stage, green during serenity, tooltip, draggable, no dependency). Character walks to the bed and uses the vanilla sitting pose during the action. Sleep bonus during serenity. Gauge panel hidden by default (J to show).
 - **2.1.0** — Action available at any need level (pleasure / anti-boredom), with a cooldown (2 h) and an effect scaled by the gauge (40 % at 0 %, 100 % at 100 %). Boredom relief raised to 20. State shown in the menu title. Accents fixed in fallback texts.
 - **2.0.1** — Fix: built-in FR/EN texts (no more raw `IGUI_…` keys if Translate files fail to load), translations also in `common/`, safer bed detection, no more errors from the J key / tooltips, context menu protected, wider panel.
 - **2.0.0** — Final version, Build 42 only (42.20.x). Realistic mode: indoors + bed/couch, bed quality, exhaustion/hunger checks, privacy on by default, serenity period. Context menu only on beds / players. FR + EN. Workshop-ready.

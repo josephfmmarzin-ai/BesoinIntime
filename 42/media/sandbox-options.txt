@@ -80,6 +80,24 @@ option BesoinIntime.RequirePrivacy
 
 option BesoinIntime.PanelDefault
 {
-	type = boolean, default = true,
+	type = boolean, default = false,
 	page = BesoinIntime, translation = BesoinIntime_PanelDefault,
+}
+
+option BesoinIntime.MoodleEnabled
+{
+	type = boolean, default = true,
+	page = BesoinIntime, translation = BesoinIntime_MoodleEnabled,
+}
+
+option BesoinIntime.SitPose
+{
+	type = boolean, default = true,
+	page = BesoinIntime, translation = BesoinIntime_SitPose,
+}
+
+option BesoinIntime.SleepBonus
+{
+	type = double, min = 0.0, max = 0.05, default = 0.01,
+	page = BesoinIntime, translation = BesoinIntime_SleepBonus,
 }
