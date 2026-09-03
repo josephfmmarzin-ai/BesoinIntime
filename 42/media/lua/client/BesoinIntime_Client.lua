@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 2.2.2 - action, menu contextuel, panneau, multijoueur (client) - Build 42
+-- Besoin Intime 2.3.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -17,13 +17,35 @@ end
 -- ---------------------------------------------------------------------------
 -- Action chronometree (aucune animation, barre de progression standard)
 -- ---------------------------------------------------------------------------
-ISBesoinIntimeAction = ISBaseTimedAction:derive("ISBesoinIntimeAction")
+-- On derive de l'action vanilla "s'asseoir par terre" quand elle existe : le
+-- personnage prend la pose assise sur le lit pendant l'action. Sinon, action simple.
+local SitBase = nil
+pcall(function() require "TimedActions/ISSitOnGround" end)
+if BI.opt("SitPose", true) and ISSitOnGround and ISSitOnGround.new then SitBase = ISSitOnGround end
+local ActionBase = SitBase or ISBaseTimedAction
+
+ISBesoinIntimeAction = ActionBase:derive("ISBesoinIntimeAction")
+ISBesoinIntimeAction.usesSit = (SitBase ~= nil)
 
 function ISBesoinIntimeAction:isValid()
-    return not self.character:isDead()
+    if self.character:isDead() then return false end
+    if self.usesSit then
+        local ok, v = pcall(ActionBase.isValid, self)
+        if ok and v == false then return false end
+    end
+    return true
+end
+
+function ISBesoinIntimeAction:waitToStart()
+    if self.usesSit then
+        local ok, v = pcall(ActionBase.waitToStart, self)
+        if ok then return v end
+    end
+    return false
 end
 
 function ISBesoinIntimeAction:update()
+    if self.usesSit then pcall(ActionBase.update, self) end
     self.tick = (self.tick or 0) + 1
     if self.tick % 60 == 0 and BI.opt("ZombieCheck", true) and BI.zombieNear(self.character) then
         halo(self.character, "IGUI_BesoinIntime_Interrupted", 255, 120, 120)
@@ -31,35 +53,51 @@ function ISBesoinIntimeAction:update()
     end
 end
 
-local function setSitting(character, on)
-    if not BI.opt("SitPose", true) then return end
-    pcall(function()
-        if character.setSitOnGround then character:setSitOnGround(on) end
-    end)
-end
-
 function ISBesoinIntimeAction:start()
-    setSitting(self.character, true)
+    if self.usesSit then pcall(ActionBase.start, self) end
     halo(self.character, "IGUI_BesoinIntime_Started", 220, 180, 255)
 end
 
 function ISBesoinIntimeAction:stop()
-    setSitting(self.character, false)
-    ISBaseTimedAction.stop(self)
+    if self.usesSit then
+        pcall(ActionBase.stop, self)
+    else
+        ISBaseTimedAction.stop(self)
+    end
 end
 
 function ISBesoinIntimeAction:perform()
-    setSitting(self.character, false)
     BI.applyRelief(self.character, self.withPartner, self.bedQuality)
-    ISBaseTimedAction.perform(self)
+    if self.usesSit then
+        pcall(ActionBase.perform, self)
+    else
+        ISBaseTimedAction.perform(self)
+    end
 end
 
-function ISBesoinIntimeAction:new(character, withPartner, bedQuality)
-    local o = ISBaseTimedAction.new(self, character)
+function ISBesoinIntimeAction:complete()
+    return true
+end
+
+function ISBesoinIntimeAction:getDuration()
+    return self.maxTime
+end
+
+function ISBesoinIntimeAction:new(character, withPartner, bedQuality, bed)
+    local o
+    if SitBase then
+        local ok, res = pcall(SitBase.new, self, character, bed)
+        if ok and res then o = res else o = ISBaseTimedAction.new(self, character); o.usesSit = false end
+    else
+        o = ISBaseTimedAction.new(self, character)
+    end
     o.withPartner = withPartner
     o.bedQuality = bedQuality
     o.stopOnWalk = true
     o.stopOnRun = true
+    o.loopedAction = false
+    o.useProgressBar = true
+    o.forceProgressBar = true
     o.maxTime = BI.opt("DurationSeconds", 20) * 50
     if withPartner then o.maxTime = o.maxTime * 1.5 end
     if character:isTimedActionInstant() then o.maxTime = 1 end
@@ -77,7 +115,7 @@ function BI.startAction(player, withPartner, bed)
             luautils.walkAdj(player, bed:getSquare(), true)
         end
     end
-    ISTimedActionQueue.add(ISBesoinIntimeAction:new(player, withPartner, quality))
+    ISTimedActionQueue.add(ISBesoinIntimeAction:new(player, withPartner, quality, bed))
 end
 
 -- ---------------------------------------------------------------------------
