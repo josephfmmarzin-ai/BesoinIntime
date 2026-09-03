@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 2.2.0 — action, menu contextuel, panneau, multijoueur (client) — Build 42
+-- Besoin Intime 2.2.1 — action, menu contextuel, panneau, multijoueur (client) — Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -169,9 +169,11 @@ end
 
 function BesoinIntimeMoodle:currentKey(player)
     if BI.isCalm(player) then return "calm" end
-    local stage = BI.getStage(BI.getNeed(player))
-    if stage >= 2 then return stage end
-    return nil
+    local need = BI.getNeed(player)
+    if need < BI.opt("MoodleThreshold", 70) then return nil end
+    local stage = BI.getStage(need)
+    if stage < 2 then stage = 2 end
+    return stage
 end
 
 function BesoinIntimeMoodle:render()

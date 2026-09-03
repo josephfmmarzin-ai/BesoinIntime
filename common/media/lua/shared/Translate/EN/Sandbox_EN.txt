@@ -34,4 +34,6 @@ Sandbox_EN = {
 	Sandbox_BesoinIntime_SitPose_tooltip = "Uses the vanilla sitting pose. Disable to keep the character standing.",
 	Sandbox_BesoinIntime_SleepBonus = "Sleep bonus (fatigue per 10 min)",
 	Sandbox_BesoinIntime_SleepBonus_tooltip = "Extra fatigue recovered every 10 in-game minutes when sleeping during the serenity period.",
+	Sandbox_BesoinIntime_MoodleThreshold = "Moodle appears at (%% need)",
+	Sandbox_BesoinIntime_MoodleThreshold_tooltip = "The moodle icon is shown once the need reaches this percentage.",
 }

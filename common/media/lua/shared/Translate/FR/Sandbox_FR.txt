@@ -34,4 +34,6 @@ Sandbox_FR = {
 	Sandbox_BesoinIntime_SitPose_tooltip = "Utilise la pose assise vanilla. Désactiver pour rester debout.",
 	Sandbox_BesoinIntime_SleepBonus = "Bonus de sommeil (fatigue par 10 min)",
 	Sandbox_BesoinIntime_SleepBonus_tooltip = "Fatigue supplémentaire récupérée toutes les 10 min de jeu en dormant pendant la période de sérénité.",
+	Sandbox_BesoinIntime_MoodleThreshold = "Apparition du moodle à (%% de besoin)",
+	Sandbox_BesoinIntime_MoodleThreshold_tooltip = "L'icône de moodle s'affiche quand le besoin atteint ce pourcentage.",
 }
