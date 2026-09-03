@@ -14,7 +14,7 @@ Ajoute un **besoin intime réaliste** au personnage : une jauge cachée monte av
 ### Installation
 **Steam Workshop** (recommandé) : [s'abonner au mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), puis l'activer dans le Mod Manager.
 
-**Manuelle** : télécharger `BesoinIntime-v2.0.1.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
+**Manuelle** : télécharger `BesoinIntime-v2.1.0.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
 
 ### Utilisation
 - **Clic droit sur un lit ou un canapé** (ou en étant juste à côté) → **Besoin intime** → *Prendre un moment pour soi*.
@@ -28,8 +28,8 @@ Ajoute un **besoin intime réaliste** au personnage : une jauge cachée monte av
 | Temps pour atteindre 100 % | 72 h de jeu |
 | Stress au-dessus de 50 % | jusqu'à +0.005 / 10 min |
 | Tristesse au-dessus de 75 % | jusqu'à +0.25 / 10 min |
-| Besoin minimum pour agir | 25 % |
-| Soulagement | stress −0.35, tristesse −12, ennui −10, panique −10, fatigue +0.05 |
+| Délai entre deux moments | 2 h de jeu (possible même à 0 %, effet réduit) |
+| Soulagement | stress −0.35, tristesse −12, ennui −20, panique −10, fatigue +0.05 |
 | Bon lit / mauvais lit | ×1.2 / ×0.8 |
 | Avec partenaire | ×1.5, action plus longue |
 | Sérénité après | 3 h de jeu sans montée |
@@ -55,7 +55,7 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 ### Install
 **Steam Workshop** (recommended): [subscribe](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), then enable it in the Mod Manager.
 
-**Manual**: download `BesoinIntime-v2.0.1.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
+**Manual**: download `BesoinIntime-v2.1.0.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
 
 ### Usage
 - **Right-click a bed or couch** (or stand next to one) → **Intimate need** → *Take some time for yourself*.
@@ -69,8 +69,8 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 | Time to reach 100 % | 72 in-game hours |
 | Stress above 50 % | up to +0.005 / 10 min |
 | Unhappiness above 75 % | up to +0.25 / 10 min |
-| Minimum need to act | 25 % |
-| Relief | stress −0.35, unhappiness −12, boredom −10, panic −10, fatigue +0.05 |
+| Cooldown between moments | 2 in-game hours (works even at 0 %, reduced effect) |
+| Relief | stress −0.35, unhappiness −12, boredom −20, panic −10, fatigue +0.05 |
 | Good / bad bed | ×1.2 / ×0.8 |
 | With a partner | ×1.5, longer action |
 | Serenity afterwards | 3 in-game hours without gain |
@@ -79,6 +79,7 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 ---
 
 ## Changelog
+- **2.1.0** — Action available at any need level (pleasure / anti-boredom), with a cooldown (2 h) and an effect scaled by the gauge (40 % at 0 %, 100 % at 100 %). Boredom relief raised to 20. State shown in the menu title. Accents fixed in fallback texts.
 - **2.0.1** — Fix: built-in FR/EN texts (no more raw `IGUI_…` keys if Translate files fail to load), translations also in `common/`, safer bed detection, no more errors from the J key / tooltips, context menu protected, wider panel.
 - **2.0.0** — Final version, Build 42 only (42.20.x). Realistic mode: indoors + bed/couch, bed quality, exhaustion/hunger checks, privacy on by default, serenity period. Context menu only on beds / players. FR + EN. Workshop-ready.
 - **1.1.0** — Build 42 compatibility layer.

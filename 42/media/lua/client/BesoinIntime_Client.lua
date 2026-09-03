@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 2.0.1 â€” action, menu contextuel, panneau, multijoueur (client) â€” Build 42
+-- Besoin Intime 2.1.0 — action, menu contextuel, panneau, multijoueur (client) — Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -15,7 +15,7 @@ local function halo(player, key, r, g, b)
 end
 
 -- ---------------------------------------------------------------------------
--- Action chronomÃ©trÃ©e (aucune animation, barre de progression standard)
+-- Action chronométrée (aucune animation, barre de progression standard)
 -- ---------------------------------------------------------------------------
 ISBesoinIntimeAction = ISBaseTimedAction:derive("ISBesoinIntimeAction")
 
@@ -65,7 +65,7 @@ function BI.startAction(player, withPartner, bed)
 end
 
 -- ---------------------------------------------------------------------------
--- Panneau (jauge), dÃ©plaÃ§able
+-- Panneau (jauge), déplaçable
 -- ---------------------------------------------------------------------------
 BesoinIntimePanel = ISPanel:derive("BesoinIntimePanel")
 BI.panel = nil
@@ -187,7 +187,7 @@ local function fillContextMenu(playerNum, context, worldobjects, test)
         if obj and obj:getSquare() then square = obj:getSquare(); break end
     end
 
-    -- Le menu n'apparaÃ®t que sur un lit/canapÃ© cliquÃ©, Ã  cÃ´tÃ© d'un lit,
+    -- Le menu n'apparaît que sur un lit/canapé cliqué, à côté d'un lit,
     -- ou sur un autre joueur (multi).
     local bed = BI.findBed(player, worldobjects)
     local others = {}
@@ -202,13 +202,10 @@ local function fillContextMenu(playerNum, context, worldobjects, test)
     end
     if not bed and #others == 0 then return end
 
-    local root = context:addOption(BI.T("ContextMenu_BesoinIntime_Title"))
+    local root = context:addOption(BI.T("ContextMenu_BesoinIntime_TitleState",
+        BI.getStageName(player), tostring(math.floor(BI.getNeed(player)))))
     local sub = ISContextMenu:getNew(context)
     context:addSubMenu(root, sub)
-
-    local state = sub:addOption(BI.T("ContextMenu_BesoinIntime_State",
-        BI.getStageName(player), tostring(math.floor(BI.getNeed(player)))))
-    state.notAvailable = true
 
     if bed then
         local relax = sub:addOption(BI.T("ContextMenu_BesoinIntime_Relax"), player, BI.onRelax, bed)
@@ -238,7 +235,7 @@ end
 Events.OnFillWorldObjectContextMenu.Add(onFillWorldObjectContextMenu)
 
 -- ---------------------------------------------------------------------------
--- Multijoueur : rÃ©ception des propositions / rÃ©ponses
+-- Multijoueur : réception des propositions / réponses
 -- ---------------------------------------------------------------------------
 local function onServerCommand(module, command, args)
     if module ~= BI.MODULE or not args then return end
@@ -277,7 +274,7 @@ end
 Events.OnServerCommand.Add(onServerCommand)
 
 -- ---------------------------------------------------------------------------
--- Tick 10 minutes de jeu + crÃ©ation du panneau
+-- Tick 10 minutes de jeu + création du panneau
 -- ---------------------------------------------------------------------------
 Events.EveryTenMinutes.Add(function()
     for i = 0, getNumActivePlayers() - 1 do

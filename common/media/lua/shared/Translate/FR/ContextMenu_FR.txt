@@ -1,6 +1,7 @@
 ContextMenu_FR = {
 	ContextMenu_BesoinIntime_Title = "Besoin intime",
 	ContextMenu_BesoinIntime_State = "État : %1 (%2 %%)",
+	ContextMenu_BesoinIntime_TitleState = "Besoin intime — %1 (%2 %%)",
 	ContextMenu_BesoinIntime_Relax = "Prendre un moment pour soi",
 	ContextMenu_BesoinIntime_Propose = "Proposer un moment intime à %1",
 	ContextMenu_BesoinIntime_TogglePanel = "Afficher / masquer la jauge",

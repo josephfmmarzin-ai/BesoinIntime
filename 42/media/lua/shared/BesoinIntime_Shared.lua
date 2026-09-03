@@ -1,14 +1,15 @@
 -- ===========================================================================
--- Besoin Intime â€” logique partagÃ©e (client + serveur) â€” Build 42
+-- Besoin Intime — logique partagée (client + serveur) — Build 42
 -- ===========================================================================
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "2.0.1"
+BI.VERSION   = "2.1.0"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
-BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'Ã  la fin de la sÃ©rÃ©nitÃ©
+BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'à la fin de la sérénité
 BI.PANEL_KEY = "BesoinIntime_PanelVisible"
+BI.KEY_LAST  = "BesoinIntime_LastRelief"   -- heures-monde du dernier moment
 
 local function clamp(v, lo, hi)
     if v < lo then return lo elseif v > hi then return hi end
@@ -25,12 +26,13 @@ end
 
 
 -- ---------------------------------------------------------------------------
--- Textes de secours FR / EN (utilisÃ©s si les fichiers Translate ne sont pas chargÃ©s)
+-- Textes de secours FR / EN (utilisés si les fichiers Translate ne sont pas chargés)
 -- ---------------------------------------------------------------------------
 BI.TEXTS = {
     EN = {
         ContextMenu_BesoinIntime_Title = "Intimate need",
         ContextMenu_BesoinIntime_State = "State: %1 (%2 %%)",
+        ContextMenu_BesoinIntime_TitleState = "Intimate need — %1 (%2 %%)",
         ContextMenu_BesoinIntime_Relax = "Take some time for yourself",
         ContextMenu_BesoinIntime_Propose = "Propose an intimate moment to %1",
         ContextMenu_BesoinIntime_TogglePanel = "Show / hide gauge",
@@ -44,7 +46,7 @@ BI.TEXTS = {
         IGUI_BesoinIntime_Started = "Relaxing...",
         IGUI_BesoinIntime_Relieved = "Relieved",
         IGUI_BesoinIntime_Interrupted = "Zombies nearby!",
-        IGUI_BesoinIntime_NoDesire = "Not in the mood right now.",
+        IGUI_BesoinIntime_NoDesire = "Not right now, too soon since last time.",
         IGUI_BesoinIntime_InVehicle = "Not in a vehicle.",
         IGUI_BesoinIntime_NotIndoors = "Needs to be indoors.",
         IGUI_BesoinIntime_NoBed = "Needs a bed or a couch nearby.",
@@ -58,31 +60,32 @@ BI.TEXTS = {
     },
     FR = {
         ContextMenu_BesoinIntime_Title = "Besoin intime",
-        ContextMenu_BesoinIntime_State = "Ã‰tat : %1 (%2 %%)",
+        ContextMenu_BesoinIntime_State = "État : %1 (%2 %%)",
+        ContextMenu_BesoinIntime_TitleState = "Besoin intime — %1 (%2 %%)",
         ContextMenu_BesoinIntime_Relax = "Prendre un moment pour soi",
-        ContextMenu_BesoinIntime_Propose = "Proposer un moment intime Ã  %1",
+        ContextMenu_BesoinIntime_Propose = "Proposer un moment intime à %1",
         ContextMenu_BesoinIntime_TogglePanel = "Afficher / masquer la jauge",
         IGUI_BesoinIntime_Title = "Besoin intime",
-        IGUI_BesoinIntime_Stage0 = "ComblÃ©(e)",
+        IGUI_BesoinIntime_Stage0 = "Comblé(e)",
         IGUI_BesoinIntime_Stage1 = "Serein(e)",
         IGUI_BesoinIntime_Stage2 = "En manque",
-        IGUI_BesoinIntime_Stage3 = "FrustrÃ©(e)",
-        IGUI_BesoinIntime_Stage4 = "TrÃ¨s frustrÃ©(e)",
-        IGUI_BesoinIntime_Calm = "ApaisÃ©(e)",
-        IGUI_BesoinIntime_Started = "Se dÃ©tend...",
-        IGUI_BesoinIntime_Relieved = "SoulagÃ©(e)",
-        IGUI_BesoinIntime_Interrupted = "Zombies Ã  proximitÃ© !",
-        IGUI_BesoinIntime_NoDesire = "Pas d'envie pour le moment.",
-        IGUI_BesoinIntime_InVehicle = "Pas dans un vÃ©hicule.",
-        IGUI_BesoinIntime_NotIndoors = "Il faut Ãªtre Ã  l'intÃ©rieur.",
-        IGUI_BesoinIntime_NoBed = "Il faut un lit ou un canapÃ© Ã  proximitÃ©.",
-        IGUI_BesoinIntime_TooTired = "Trop Ã©puisÃ©(e).",
-        IGUI_BesoinIntime_TooHungry = "Trop affamÃ©(e) ou assoiffÃ©(e).",
+        IGUI_BesoinIntime_Stage3 = "Frustré(e)",
+        IGUI_BesoinIntime_Stage4 = "Très frustré(e)",
+        IGUI_BesoinIntime_Calm = "Apaisé(e)",
+        IGUI_BesoinIntime_Started = "Se détend...",
+        IGUI_BesoinIntime_Relieved = "Soulagé(e)",
+        IGUI_BesoinIntime_Interrupted = "Zombies à proximité !",
+        IGUI_BesoinIntime_NoDesire = "Pas maintenant, c'est trop tôt depuis la dernière fois.",
+        IGUI_BesoinIntime_InVehicle = "Pas dans un véhicule.",
+        IGUI_BesoinIntime_NotIndoors = "Il faut être à l'intérieur.",
+        IGUI_BesoinIntime_NoBed = "Il faut un lit ou un canapé à proximité.",
+        IGUI_BesoinIntime_TooTired = "Trop épuisé(e).",
+        IGUI_BesoinIntime_TooHungry = "Trop affamé(e) ou assoiffé(e).",
         IGUI_BesoinIntime_ZombiesNear = "Des zombies sont trop proches.",
-        IGUI_BesoinIntime_NoPrivacy = "Quelqu'un d'autre est Ã  proximitÃ©.",
-        IGUI_BesoinIntime_ProposalSent = "Proposition envoyÃ©e...",
+        IGUI_BesoinIntime_NoPrivacy = "Quelqu'un d'autre est à proximité.",
+        IGUI_BesoinIntime_ProposalSent = "Proposition envoyée...",
         IGUI_BesoinIntime_ProposalReceived = "%1 vous propose un moment intime. Accepter ?",
-        IGUI_BesoinIntime_Declined = "Proposition refusÃ©e.",
+        IGUI_BesoinIntime_Declined = "Proposition refusée.",
     },
 }
 
@@ -98,7 +101,7 @@ local function currentLang()
     return "EN"
 end
 
--- Texte traduit, avec secours intÃ©grÃ© si le fichier Translate est absent.
+-- Texte traduit, avec secours intégré si le fichier Translate est absent.
 function BI.T(key, ...)
     local args = { ... }
     local ok, txt = pcall(function() return getText(key, unpack(args)) end)
@@ -123,7 +126,7 @@ function BI.setNeed(player, value)
     player:getModData()[BI.KEY] = clamp(value, 0, 100)
 end
 
--- Paliers : 0 comblÃ©, 1 serein, 2 en manque, 3 frustrÃ©, 4 trÃ¨s frustrÃ©
+-- Paliers : 0 comblé, 1 serein, 2 en manque, 3 frustré, 4 très frustré
 function BI.getStage(need)
     if need < 15 then return 0 end
     if need < 40 then return 1 end
@@ -147,7 +150,7 @@ function BI.isCalm(player)
 end
 
 -- ---------------------------------------------------------------------------
--- Tick toutes les 10 minutes de jeu : montÃ©e + effets nÃ©gatifs
+-- Tick toutes les 10 minutes de jeu : montée + effets négatifs
 -- ---------------------------------------------------------------------------
 function BI.tickPlayer(player)
     if not player or player:isDead() then return end
@@ -169,7 +172,7 @@ function BI.tickPlayer(player)
 end
 
 -- ---------------------------------------------------------------------------
--- Lit / canapÃ©
+-- Lit / canapé
 -- ---------------------------------------------------------------------------
 local function objectIsBed(obj)
     if not obj or not obj.getSprite then return false end
@@ -194,7 +197,7 @@ local function objectIsBed(obj)
 end
 BI.objectIsBed = objectIsBed
 
--- QualitÃ© du lit : "goodBed", "averageBed", "badBed" (dÃ©faut averageBed)
+-- Qualité du lit : "goodBed", "averageBed", "badBed" (défaut averageBed)
 function BI.bedQuality(bed)
     local ok, q = pcall(function()
         local sprite = bed:getSprite()
@@ -207,7 +210,7 @@ function BI.bedQuality(bed)
     return "averageBed"
 end
 
--- Cherche un lit parmi les objets cliquÃ©s, sinon dans le 3x3 autour du joueur
+-- Cherche un lit parmi les objets cliqués, sinon dans le 3x3 autour du joueur
 function BI.findBed(player, worldobjects)
     if worldobjects then
         for _, obj in ipairs(worldobjects) do
@@ -233,7 +236,7 @@ function BI.findBed(player, worldobjects)
 end
 
 -- ---------------------------------------------------------------------------
--- VÃ©rifications
+-- Vérifications
 -- ---------------------------------------------------------------------------
 function BI.zombieNear(player)
     local radius = BI.opt("ZombieRadius", 10)
@@ -263,9 +266,11 @@ function BI.playerNear(player, radius, exclude)
     return false
 end
 
--- Retourne ok, clÃ©Message, lit
+-- Retourne ok, cléMessage, lit
 function BI.canRelax(player, partner, worldobjects)
-    if BI.getNeed(player) < BI.opt("MinNeed", 25) then
+    -- Toujours possible, même à 0 % (plaisir / anti-ennui), mais pas à répétition
+    local last = player:getModData()[BI.KEY_LAST]
+    if last and worldHours() < last + BI.opt("CooldownHours", 2) then
         return false, "IGUI_BesoinIntime_NoDesire"
     end
     if player:getVehicle() then
@@ -303,16 +308,21 @@ function BI.applyRelief(player, withPartner, bedQuality)
     local mult = withPartner and BI.opt("PartnerBonus", 1.5) or 1.0
     if bedQuality == "goodBed" then mult = mult * 1.2
     elseif bedQuality == "badBed" then mult = mult * 0.8 end
+    -- Effet réduit quand la jauge est basse (plaisir sans besoin) : de 40 % à 100 %
+    local need = BI.getNeed(player)
+    local pleasure = BI.opt("LowNeedEffect", 0.4)
+    mult = mult * (pleasure + (1 - pleasure) * (need / 100))
 
     local stats = player:getStats()
     local bd = player:getBodyDamage()
     stats:setStress(clamp(stats:getStress() - BI.opt("StressRelief", 0.35) * mult, 0, 1))
     stats:setPanic(clamp(stats:getPanic() - 10 * mult, 0, 100))
     bd:setUnhappynessLevel(clamp(bd:getUnhappynessLevel() - BI.opt("UnhappyRelief", 12) * mult, 0, 100))
-    bd:setBoredomLevel(clamp(bd:getBoredomLevel() - 10 * mult, 0, 100))
+    bd:setBoredomLevel(clamp(bd:getBoredomLevel() - BI.opt("BoredomRelief", 20) * mult, 0, 100))
     stats:setFatigue(clamp(stats:getFatigue() + 0.05, 0, 1))
     BI.setNeed(player, 0)
     player:getModData()[BI.KEY_CALM] = worldHours() + BI.opt("CalmHours", 3)
+    player:getModData()[BI.KEY_LAST] = worldHours()
 
     if player.setHaloNote then
         player:setHaloNote(BI.T("IGUI_BesoinIntime_Relieved"), 150, 255, 150, 400)
