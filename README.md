@@ -14,10 +14,10 @@ Ajoute un **besoin intime réaliste** au personnage : une jauge cachée monte av
 ### Installation
 **Steam Workshop** (recommandé) : [s'abonner au mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), puis l'activer dans le Mod Manager.
 
-**Manuelle** : télécharger `BesoinIntime-v2.3.0.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
+**Manuelle** : télécharger `BesoinIntime-v3.0.0.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
 
 ### Utilisation
-- **Clic droit sur un lit ou un canapé** (ou en étant juste à côté) → **Besoin intime** → *Prendre un moment pour soi*.
+- **Clic droit sur un lit, canapé, fauteuil, chaise** (ou juste à côté), ou **dans un véhicule à l'arrêt** → **Besoin intime** → *Prendre un moment pour soi*. Pendant le moment : pose assise, cache noir, petit son en boucle, puis souffle + carillon.
 - **Clic droit sur un autre joueur** (multi) → *Proposer un moment intime à …* ; il reçoit une fenêtre Oui / Non.
 - **Icône de moodle** dans la colonne de droite à partir de 70 % de besoin (orange → rouge, seuil réglable), verte pendant la sérénité ; survol = description ; déplaçable.
 - **Touche J** : afficher la jauge détaillée (masquée par défaut, modifiable dans *Options → Touches*).
@@ -56,10 +56,10 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 ### Install
 **Steam Workshop** (recommended): [subscribe](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), then enable it in the Mod Manager.
 
-**Manual**: download `BesoinIntime-v2.3.0.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
+**Manual**: download `BesoinIntime-v3.0.0.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
 
 ### Usage
-- **Right-click a bed or couch** (or stand next to one) → **Intimate need** → *Take some time for yourself*.
+- **Right-click a bed, couch, armchair, chair** (or stand next to one), or **in a parked vehicle** → **Intimate need** → *Take some time for yourself*. During the moment: sitting pose, black censor box, small looping sound, then a sigh + chime.
 - **Right-click another player** (MP) → *Propose an intimate moment to …*; they get a Yes / No dialog.
 - **Moodle icon** in the right column from 70 % need (orange → red, threshold tunable), green during serenity; hover for details; draggable.
 - **J key**: show the detailed gauge (hidden by default, rebindable in *Options → Keys*).
@@ -81,6 +81,7 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 ---
 
 ## Changelog
+- **3.0.0** — Works on any seat: beds (single, double, bunk), couches, armchairs, chairs, benches, and parked vehicles (engine on or off). Vanilla sitting pose on furniture. Black censor box drawn over the character during the moment, synced to other players in MP. Sounds: looping 'tortoise' squeaks during the moment, relief sigh + chime at the end (synthesized, heard by nearby players). All tunable/disable-able in Sandbox.
 - **2.3.0** — The action now derives from the vanilla `ISSitOnGround` action: the character really sits on the bed during the moment (same pose as 'Sit on ground'), then stands up. Falls back to a plain timed action if unavailable.
 - **2.2.2** — Fix from console.txt: Build 42 removed `Stats:getThirst()` and sprite `Is(IsoFlagType.bed)`; the action could not start and every right-click logged an error. Both calls are now guarded. Lua files are pure ASCII with escaped accents (correct display regardless of engine encoding).
 - **2.2.1** — Moodle icon now appears at 70 % need (Sandbox: *Moodle appears at*).

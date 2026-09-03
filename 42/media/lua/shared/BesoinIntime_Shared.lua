@@ -4,7 +4,7 @@
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "2.3.0"
+BI.VERSION   = "3.0.0"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
 BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'a la fin de la serenite
@@ -49,8 +49,10 @@ BI.TEXTS = {
         IGUI_BesoinIntime_Interrupted = "Zombies nearby!",
         IGUI_BesoinIntime_NoDesire = "Not right now, too soon since last time.",
         IGUI_BesoinIntime_InVehicle = "Not in a vehicle.",
+        IGUI_BesoinIntime_VehicleMoving = "Stop the vehicle first.",
+        IGUI_BesoinIntime_NoBedOrSeat = "Needs a bed, a couch, a chair or a parked vehicle.",
         IGUI_BesoinIntime_NotIndoors = "Needs to be indoors.",
-        IGUI_BesoinIntime_NoBed = "Needs a bed or a couch nearby.",
+        IGUI_BesoinIntime_NoBed = "Needs a bed, a couch or a chair nearby.",
         IGUI_BesoinIntime_TooTired = "Too exhausted.",
         IGUI_BesoinIntime_TooHungry = "Too hungry or thirsty.",
         IGUI_BesoinIntime_ZombiesNear = "Zombies are too close.",
@@ -82,8 +84,10 @@ BI.TEXTS = {
         IGUI_BesoinIntime_Interrupted = "Zombies \224 proximit\233 !",
         IGUI_BesoinIntime_NoDesire = "Pas maintenant, c'est trop t\244t depuis la derni\232re fois.",
         IGUI_BesoinIntime_InVehicle = "Pas dans un v\233hicule.",
+        IGUI_BesoinIntime_VehicleMoving = "Arr\234tez d'abord le v\233hicule.",
+        IGUI_BesoinIntime_NoBedOrSeat = "Il faut un lit, un canap\233, un fauteuil ou un v\233hicule \224 l'arr\234t.",
         IGUI_BesoinIntime_NotIndoors = "Il faut \234tre \224 l'int\233rieur.",
-        IGUI_BesoinIntime_NoBed = "Il faut un lit ou un canap\233 \224 proximit\233.",
+        IGUI_BesoinIntime_NoBed = "Il faut un lit, un canap\233 ou un fauteuil \224 proximit\233.",
         IGUI_BesoinIntime_TooTired = "Trop \233puis\233(e).",
         IGUI_BesoinIntime_TooHungry = "Trop affam\233(e) ou assoiff\233(e).",
         IGUI_BesoinIntime_ZombiesNear = "Des zombies sont trop proches.",
@@ -221,7 +225,8 @@ local function objectIsBed(obj)
         local sprite = obj:getSprite()
         if sprite and hasMethod(sprite, "getName") then
             local n = string.lower(tostring(sprite:getName() or ""))
-            if n:find("bedding") or n:find("_bed") or n:find("couch") or n:find("sofa") or n:find("seating_indoor") then
+            if n:find("bedding") or n:find("_bed") or n:find("bunk") or n:find("couch") or n:find("sofa")
+                or n:find("seating") or n:find("chair") or n:find("armchair") or n:find("stool") or n:find("bench") then
                 return true
             end
         end
@@ -313,16 +318,24 @@ function BI.canRelax(player, partner, worldobjects)
     if last and worldHours() < last + BI.opt("CooldownHours", 2) then
         return false, "IGUI_BesoinIntime_NoDesire"
     end
-    if player:getVehicle() then
-        return false, "IGUI_BesoinIntime_InVehicle"
-    end
-    local sq = player:getSquare()
-    if not sq or sq:isOutside() or not sq:getRoom() then
-        return false, "IGUI_BesoinIntime_NotIndoors"
-    end
-    local bed = BI.findBed(player, worldobjects)
-    if not bed then
-        return false, "IGUI_BesoinIntime_NoBed"
+    local bed = nil
+    local vehicle = player:getVehicle()
+    if vehicle then
+        -- En voiture : possible a l'arret (moteur allume ou non)
+        local speed = 0
+        if hasMethod(vehicle, "getCurrentSpeedKmHour") then speed = math.abs(vehicle:getCurrentSpeedKmHour() or 0) end
+        if speed > 1 then
+            return false, "IGUI_BesoinIntime_VehicleMoving"
+        end
+    else
+        local sq = player:getSquare()
+        if not sq or sq:isOutside() or not sq:getRoom() then
+            return false, "IGUI_BesoinIntime_NotIndoors"
+        end
+        bed = BI.findBed(player, worldobjects)
+        if not bed then
+            return false, "IGUI_BesoinIntime_NoBed"
+        end
     end
     local stats = player:getStats()
     if hasMethod(stats, "getFatigue") and stats:getFatigue() > 0.85 then
@@ -376,4 +389,23 @@ function BI.applyRelief(player, withPartner, bedQuality)
     if player.setHaloNote then
         player:setHaloNote(BI.T("IGUI_BesoinIntime_Relieved"), 150, 255, 150, 400)
     end
+end
+
+-- Sons (client) : boucle pendant l'action, son final au soulagement
+function BI.playSound(player, name)
+    if not BI.opt("SoundEnabled", true) then return nil end
+    local id = nil
+    pcall(function()
+        local em = player:getEmitter()
+        if em then id = em:playSound(name) end
+    end)
+    return id
+end
+
+function BI.stopSound(player, id)
+    if not id then return end
+    pcall(function()
+        local em = player:getEmitter()
+        if em then em:stopSound(id) end
+    end)
 end

@@ -12,7 +12,7 @@ IG_UI_EN = {
 	IGUI_BesoinIntime_NoDesire = "Not right now, too soon since last time.",
 	IGUI_BesoinIntime_InVehicle = "Not in a vehicle.",
 	IGUI_BesoinIntime_NotIndoors = "Needs to be indoors.",
-	IGUI_BesoinIntime_NoBed = "Needs a bed or a couch nearby.",
+	IGUI_BesoinIntime_NoBed = "Needs a bed, a couch or a chair nearby.",
 	IGUI_BesoinIntime_TooTired = "Too exhausted.",
 	IGUI_BesoinIntime_TooHungry = "Too hungry or thirsty.",
 	IGUI_BesoinIntime_ZombiesNear = "Zombies are too close.",
@@ -24,4 +24,6 @@ IG_UI_EN = {
 	IGUI_BesoinIntime_MoodleDesc2 = "In the mood. A bed or a couch, indoors, would do some good.",
 	IGUI_BesoinIntime_MoodleDesc3 = "Frustrated. Stress is building up. Find some privacy.",
 	IGUI_BesoinIntime_MoodleDesc4 = "Very frustrated. Stress and unhappiness keep rising.",
+	IGUI_BesoinIntime_VehicleMoving = "Stop the vehicle first.",
+	IGUI_BesoinIntime_NoBedOrSeat = "Needs a bed, a couch, a chair or a parked vehicle.",
 }

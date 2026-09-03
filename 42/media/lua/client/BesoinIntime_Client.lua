@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 2.3.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
+-- Besoin Intime 3.0.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -55,10 +55,14 @@ end
 
 function ISBesoinIntimeAction:start()
     if self.usesSit then pcall(ActionBase.start, self) end
+    self.loopSound = BI.playSound(self.character, "BesoinIntime_Moment")
+    BI.setActive(self.character, true)
     halo(self.character, "IGUI_BesoinIntime_Started", 220, 180, 255)
 end
 
 function ISBesoinIntimeAction:stop()
+    BI.stopSound(self.character, self.loopSound)
+    BI.setActive(self.character, false)
     if self.usesSit then
         pcall(ActionBase.stop, self)
     else
@@ -67,7 +71,10 @@ function ISBesoinIntimeAction:stop()
 end
 
 function ISBesoinIntimeAction:perform()
+    BI.stopSound(self.character, self.loopSound)
+    BI.setActive(self.character, false, true)
     BI.applyRelief(self.character, self.withPartner, self.bedQuality)
+    BI.playSound(self.character, "BesoinIntime_Relief")
     if self.usesSit then
         pcall(ActionBase.perform, self)
     else
@@ -85,11 +92,12 @@ end
 
 function ISBesoinIntimeAction:new(character, withPartner, bedQuality, bed)
     local o
-    if SitBase then
+    if SitBase and not character:getVehicle() then
         local ok, res = pcall(SitBase.new, self, character, bed)
         if ok and res then o = res else o = ISBaseTimedAction.new(self, character); o.usesSit = false end
     else
         o = ISBaseTimedAction.new(self, character)
+        o.usesSit = false
     end
     o.withPartner = withPartner
     o.bedQuality = bedQuality
@@ -106,7 +114,7 @@ end
 
 function BI.startAction(player, withPartner, bed)
     local quality = bed and BI.bedQuality(bed) or "averageBed"
-    if bed and bed:getSquare() then
+    if bed and bed:getSquare() and not player:getVehicle() then
         -- Marcher jusque sur le lit (pose assise dessus), sinon a cote
         local ok = pcall(function()
             ISTimedActionQueue.add(ISWalkToTimedAction:new(player, bed:getSquare()))
@@ -181,6 +189,83 @@ function BI.togglePanel()
     BI.panel:setVisible(v)
     local player = getPlayer()
     if player then player:getModData()[BI.PANEL_KEY] = v end
+end
+
+-- ---------------------------------------------------------------------------
+-- Etat "en action" (pour le cache noir et le son chez les autres joueurs)
+-- ---------------------------------------------------------------------------
+BI.activeLocal = {}    -- [playerNum] = true
+BI.activeRemote = {}   -- [onlineID] = { player = IsoPlayer, sound = id }
+
+function BI.setActive(player, on, relieved)
+    BI.activeLocal[player:getPlayerNum()] = on or nil
+    if isClient() then
+        pcall(function()
+            sendClientCommand(player, BI.MODULE, "state", { active = on == true, relieved = relieved == true })
+        end)
+    end
+end
+
+-- Cache noir dessine par-dessus la zone intime pendant l'action
+BesoinIntimeCensor = ISUIElement:derive("BesoinIntimeCensor")
+BI.censor = nil
+
+function BesoinIntimeCensor:new()
+    local o = ISUIElement:new(0, 0, getCore():getScreenWidth(), getCore():getScreenHeight())
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+
+function BesoinIntimeCensor:onMouseDown() return false end
+function BesoinIntimeCensor:onMouseUp() return false end
+function BesoinIntimeCensor:onMouseMove() return false end
+function BesoinIntimeCensor:isMouseOver() return false end
+
+local function drawCensorFor(self, player, playerNum)
+    if not player or player:isDead() then return end
+    local zoom = 1
+    pcall(function() zoom = getCore():getZoom(playerNum or 0) or 1 end)
+    if zoom <= 0 then zoom = 1 end
+    local sx = IsoUtils.XToScreen(player:getX(), player:getY(), player:getZ(), 0)
+    local sy = IsoUtils.YToScreen(player:getX(), player:getY(), player:getZ(), 0)
+    sx = (sx - IsoCamera.getOffX()) / zoom
+    sy = (sy - IsoCamera.getOffY()) / zoom
+    local w = BI.opt("CensorWidth", 34) / zoom
+    local h = BI.opt("CensorHeight", 16) / zoom
+    local dy = BI.opt("CensorOffsetY", 26) / zoom
+    if player:getVehicle() then dy = BI.opt("CensorOffsetYVehicle", 30) / zoom end
+    self:drawRect(sx - w / 2, sy - dy - h / 2, w, h, 1, 0, 0, 0)
+end
+
+function BesoinIntimeCensor:render()
+    if not BI.opt("CensorEnabled", true) then return end
+    local ok, err = pcall(function()
+        for num, on in pairs(BI.activeLocal) do
+            if on then drawCensorFor(self, getSpecificPlayer(num), num) end
+        end
+        for id, info in pairs(BI.activeRemote) do
+            local pl = info.player
+            if not pl or pl:isDead() then
+                BI.activeRemote[id] = nil
+            else
+                drawCensorFor(self, pl, 0)
+            end
+        end
+    end)
+    if not ok and not self.loggedErr then
+        self.loggedErr = true
+        print("[BesoinIntime] censor render error: " .. tostring(err))
+    end
+end
+
+function BI.createCensor()
+    if BI.censor then return end
+    BI.censor = BesoinIntimeCensor:new()
+    BI.censor:initialise()
+    BI.censor:addToUIManager()
+    BI.censor:setVisible(true)
+    BI.censor:setCapture(false)
 end
 
 -- ---------------------------------------------------------------------------
@@ -343,14 +428,15 @@ local function fillContextMenu(playerNum, context, worldobjects, test)
             end
         end
     end
-    if not bed and #others == 0 then return end
+    local inVehicle = player:getVehicle() ~= nil
+    if not bed and #others == 0 and not inVehicle then return end
 
     local root = context:addOption(BI.T("ContextMenu_BesoinIntime_TitleState",
         BI.getStageName(player), tostring(math.floor(BI.getNeed(player)))))
     local sub = ISContextMenu:getNew(context)
     context:addSubMenu(root, sub)
 
-    if bed then
+    if bed or inVehicle then
         local relax = sub:addOption(BI.T("ContextMenu_BesoinIntime_Relax"), player, BI.onRelax, bed)
         local ok, msg = BI.canRelax(player, nil, worldobjects)
         if not ok then
@@ -405,6 +491,23 @@ local function onServerCommand(module, command, args)
         modal:initialise()
         modal:addToUIManager()
 
+    elseif command == "state" then
+        local pl = nil
+        pcall(function() pl = getPlayerByOnlineID(args.id) end)
+        if pl and pl ~= player then
+            if args.active then
+                local snd = BI.playSound(pl, "BesoinIntime_Moment")
+                BI.activeRemote[args.id] = { player = pl, sound = snd }
+            else
+                local info = BI.activeRemote[args.id]
+                if info then
+                    BI.stopSound(pl, info.sound)
+                    if args.relieved then BI.playSound(pl, "BesoinIntime_Relief") end
+                end
+                BI.activeRemote[args.id] = nil
+            end
+        end
+
     elseif command == "answer" then
         if args.accepted then
             local _, _, bed = BI.canRelax(player, nil, nil)
@@ -429,5 +532,6 @@ Events.OnCreatePlayer.Add(function(playerNum)
     if playerNum == 0 then
         BI.createPanel()
         BI.createMoodle()
+        BI.createCensor()
     end
 end)

@@ -107,3 +107,39 @@ option BesoinIntime.SleepBonus
 	type = double, min = 0.0, max = 0.05, default = 0.01,
 	page = BesoinIntime, translation = BesoinIntime_SleepBonus,
 }
+
+option BesoinIntime.SoundEnabled
+{
+	type = boolean, default = true,
+	page = BesoinIntime, translation = BesoinIntime_SoundEnabled,
+}
+
+option BesoinIntime.CensorEnabled
+{
+	type = boolean, default = true,
+	page = BesoinIntime, translation = BesoinIntime_CensorEnabled,
+}
+
+option BesoinIntime.CensorWidth
+{
+	type = integer, min = 10, max = 120, default = 34,
+	page = BesoinIntime, translation = BesoinIntime_CensorWidth,
+}
+
+option BesoinIntime.CensorHeight
+{
+	type = integer, min = 4, max = 80, default = 16,
+	page = BesoinIntime, translation = BesoinIntime_CensorHeight,
+}
+
+option BesoinIntime.CensorOffsetY
+{
+	type = integer, min = -60, max = 160, default = 26,
+	page = BesoinIntime, translation = BesoinIntime_CensorOffsetY,
+}
+
+option BesoinIntime.CensorOffsetYVehicle
+{
+	type = integer, min = -60, max = 160, default = 30,
+	page = BesoinIntime, translation = BesoinIntime_CensorOffsetYVehicle,
+}

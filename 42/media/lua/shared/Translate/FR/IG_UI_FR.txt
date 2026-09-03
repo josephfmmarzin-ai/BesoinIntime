@@ -12,7 +12,7 @@ IG_UI_FR = {
 	IGUI_BesoinIntime_NoDesire = "Pas maintenant, c'est trop tôt depuis la dernière fois.",
 	IGUI_BesoinIntime_InVehicle = "Pas dans un véhicule.",
 	IGUI_BesoinIntime_NotIndoors = "Il faut être à l'intérieur.",
-	IGUI_BesoinIntime_NoBed = "Il faut un lit ou un canapé à proximité.",
+	IGUI_BesoinIntime_NoBed = "Il faut un lit, un canapé ou un fauteuil à proximité.",
 	IGUI_BesoinIntime_TooTired = "Trop épuisé(e).",
 	IGUI_BesoinIntime_TooHungry = "Trop affamé(e) ou assoiffé(e).",
 	IGUI_BesoinIntime_ZombiesNear = "Des zombies sont trop proches.",
@@ -24,4 +24,6 @@ IG_UI_FR = {
 	IGUI_BesoinIntime_MoodleDesc2 = "En manque. Un lit ou un canapé, à l'intérieur, ferait du bien.",
 	IGUI_BesoinIntime_MoodleDesc3 = "Frustré(e). Le stress s'accumule. Trouvez un peu d'intimité.",
 	IGUI_BesoinIntime_MoodleDesc4 = "Très frustré(e). Le stress et la tristesse continuent de monter.",
+	IGUI_BesoinIntime_VehicleMoving = "Arrêtez d'abord le véhicule.",
+	IGUI_BesoinIntime_NoBedOrSeat = "Il faut un lit, un canapé, un fauteuil ou un véhicule à l'arrêt.",
 }

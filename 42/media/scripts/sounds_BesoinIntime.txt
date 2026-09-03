@@ -1,0 +1,30 @@
+module Base
+{
+	sound BesoinIntime_Moment
+	{
+		category = Player,
+		loop = true,
+		is3D = true,
+		clip
+		{
+			file = media/sound/BesoinIntime_moment.ogg,
+			distanceMin = 1,
+			distanceMax = 14,
+			volume = 0.7,
+		}
+	}
+
+	sound BesoinIntime_Relief
+	{
+		category = Player,
+		loop = false,
+		is3D = true,
+		clip
+		{
+			file = media/sound/BesoinIntime_relief.ogg,
+			distanceMin = 1,
+			distanceMax = 12,
+			volume = 0.8,
+		}
+	}
+}

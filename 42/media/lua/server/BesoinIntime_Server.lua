@@ -13,6 +13,11 @@ if isServer() then
                     { from = player:getOnlineID(), name = player:getUsername() })
             end
 
+        elseif command == "state" then
+            -- Diffuse l'etat (cache noir + son) a tous les clients
+            sendServerCommand(BI.MODULE, "state",
+                { id = player:getOnlineID(), active = args.active == true, relieved = args.relieved == true })
+
         elseif command == "answer" then
             local proposer = getPlayerByOnlineID(args.to)
             if proposer then
