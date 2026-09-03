@@ -1,13 +1,13 @@
 -- ===========================================================================
--- Besoin Intime — logique partagée (client + serveur) — Build 42
+-- Besoin Intime - logique partagee (client + serveur) - Build 42
 -- ===========================================================================
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "2.2.1"
+BI.VERSION   = "2.2.2"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
-BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'à la fin de la sérénité
+BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'a la fin de la serenite
 BI.PANEL_KEY = "BesoinIntime_PanelVisible"
 BI.KEY_LAST  = "BesoinIntime_LastRelief"   -- heures-monde du dernier moment
 BI.MOODLE_POS_KEY = "BesoinIntime_MoodlePos"
@@ -27,13 +27,13 @@ end
 
 
 -- ---------------------------------------------------------------------------
--- Textes de secours FR / EN (utilisés si les fichiers Translate ne sont pas chargés)
+-- Textes de secours FR / EN (utilises si les fichiers Translate ne sont pas charges)
 -- ---------------------------------------------------------------------------
 BI.TEXTS = {
     EN = {
         ContextMenu_BesoinIntime_Title = "Intimate need",
         ContextMenu_BesoinIntime_State = "State: %1 (%2 %%)",
-        ContextMenu_BesoinIntime_TitleState = "Intimate need — %1 (%2 %%)",
+        ContextMenu_BesoinIntime_TitleState = "Intimate need - %1 (%2 %%)",
         ContextMenu_BesoinIntime_Relax = "Take some time for yourself",
         ContextMenu_BesoinIntime_Propose = "Propose an intimate moment to %1",
         ContextMenu_BesoinIntime_TogglePanel = "Show / hide gauge",
@@ -65,36 +65,36 @@ BI.TEXTS = {
     },
     FR = {
         ContextMenu_BesoinIntime_Title = "Besoin intime",
-        ContextMenu_BesoinIntime_State = "État : %1 (%2 %%)",
-        ContextMenu_BesoinIntime_TitleState = "Besoin intime — %1 (%2 %%)",
+        ContextMenu_BesoinIntime_State = "\201tat : %1 (%2 %%)",
+        ContextMenu_BesoinIntime_TitleState = "Besoin intime - %1 (%2 %%)",
         ContextMenu_BesoinIntime_Relax = "Prendre un moment pour soi",
-        ContextMenu_BesoinIntime_Propose = "Proposer un moment intime à %1",
+        ContextMenu_BesoinIntime_Propose = "Proposer un moment intime \224 %1",
         ContextMenu_BesoinIntime_TogglePanel = "Afficher / masquer la jauge",
         IGUI_BesoinIntime_Title = "Besoin intime",
-        IGUI_BesoinIntime_Stage0 = "Comblé(e)",
+        IGUI_BesoinIntime_Stage0 = "Combl\233(e)",
         IGUI_BesoinIntime_Stage1 = "Serein(e)",
         IGUI_BesoinIntime_Stage2 = "En manque",
-        IGUI_BesoinIntime_Stage3 = "Frustré(e)",
-        IGUI_BesoinIntime_Stage4 = "Très frustré(e)",
-        IGUI_BesoinIntime_Calm = "Apaisé(e)",
-        IGUI_BesoinIntime_Started = "Se détend...",
-        IGUI_BesoinIntime_Relieved = "Soulagé(e)",
-        IGUI_BesoinIntime_Interrupted = "Zombies à proximité !",
-        IGUI_BesoinIntime_NoDesire = "Pas maintenant, c'est trop tôt depuis la dernière fois.",
-        IGUI_BesoinIntime_InVehicle = "Pas dans un véhicule.",
-        IGUI_BesoinIntime_NotIndoors = "Il faut être à l'intérieur.",
-        IGUI_BesoinIntime_NoBed = "Il faut un lit ou un canapé à proximité.",
-        IGUI_BesoinIntime_TooTired = "Trop épuisé(e).",
-        IGUI_BesoinIntime_TooHungry = "Trop affamé(e) ou assoiffé(e).",
+        IGUI_BesoinIntime_Stage3 = "Frustr\233(e)",
+        IGUI_BesoinIntime_Stage4 = "Tr\232s frustr\233(e)",
+        IGUI_BesoinIntime_Calm = "Apais\233(e)",
+        IGUI_BesoinIntime_Started = "Se d\233tend...",
+        IGUI_BesoinIntime_Relieved = "Soulag\233(e)",
+        IGUI_BesoinIntime_Interrupted = "Zombies \224 proximit\233 !",
+        IGUI_BesoinIntime_NoDesire = "Pas maintenant, c'est trop t\244t depuis la derni\232re fois.",
+        IGUI_BesoinIntime_InVehicle = "Pas dans un v\233hicule.",
+        IGUI_BesoinIntime_NotIndoors = "Il faut \234tre \224 l'int\233rieur.",
+        IGUI_BesoinIntime_NoBed = "Il faut un lit ou un canap\233 \224 proximit\233.",
+        IGUI_BesoinIntime_TooTired = "Trop \233puis\233(e).",
+        IGUI_BesoinIntime_TooHungry = "Trop affam\233(e) ou assoiff\233(e).",
         IGUI_BesoinIntime_ZombiesNear = "Des zombies sont trop proches.",
-        IGUI_BesoinIntime_NoPrivacy = "Quelqu'un d'autre est à proximité.",
-        IGUI_BesoinIntime_ProposalSent = "Proposition envoyée...",
+        IGUI_BesoinIntime_NoPrivacy = "Quelqu'un d'autre est \224 proximit\233.",
+        IGUI_BesoinIntime_ProposalSent = "Proposition envoy\233e...",
         IGUI_BesoinIntime_ProposalReceived = "%1 vous propose un moment intime. Accepter ?",
-        IGUI_BesoinIntime_Declined = "Proposition refusée.",
-        IGUI_BesoinIntime_MoodleCalm = "Apaisé(e). Le besoin ne remonte pas pendant un moment, et le sommeil est plus réparateur.",
-        IGUI_BesoinIntime_MoodleDesc2 = "En manque. Un lit ou un canapé, à l'intérieur, ferait du bien.",
-        IGUI_BesoinIntime_MoodleDesc3 = "Frustré(e). Le stress s'accumule. Trouvez un peu d'intimité.",
-        IGUI_BesoinIntime_MoodleDesc4 = "Très frustré(e). Le stress et la tristesse continuent de monter.",
+        IGUI_BesoinIntime_Declined = "Proposition refus\233e.",
+        IGUI_BesoinIntime_MoodleCalm = "Apais\233(e). Le besoin ne remonte pas pendant un moment, et le sommeil est plus r\233parateur.",
+        IGUI_BesoinIntime_MoodleDesc2 = "En manque. Un lit ou un canap\233, \224 l'int\233rieur, ferait du bien.",
+        IGUI_BesoinIntime_MoodleDesc3 = "Frustr\233(e). Le stress s'accumule. Trouvez un peu d'intimit\233.",
+        IGUI_BesoinIntime_MoodleDesc4 = "Tr\232s frustr\233(e). Le stress et la tristesse continuent de monter.",
     },
 }
 
@@ -110,7 +110,7 @@ local function currentLang()
     return "EN"
 end
 
--- Texte traduit, avec secours intégré si le fichier Translate est absent.
+-- Texte traduit, avec secours integre si le fichier Translate est absent.
 function BI.T(key, ...)
     local args = { ... }
     local ok, txt = pcall(function() return getText(key, unpack(args)) end)
@@ -135,7 +135,7 @@ function BI.setNeed(player, value)
     player:getModData()[BI.KEY] = clamp(value, 0, 100)
 end
 
--- Paliers : 0 comblé, 1 serein, 2 en manque, 3 frustré, 4 très frustré
+-- Paliers : 0 comble, 1 serein, 2 en manque, 3 frustre, 4 tres frustre
 function BI.getStage(need)
     if need < 15 then return 0 end
     if need < 40 then return 1 end
@@ -159,12 +159,12 @@ function BI.isCalm(player)
 end
 
 -- ---------------------------------------------------------------------------
--- Tick toutes les 10 minutes de jeu : montée + effets négatifs
+-- Tick toutes les 10 minutes de jeu : montee + effets negatifs
 -- ---------------------------------------------------------------------------
 function BI.tickPlayer(player)
     if not player or player:isDead() then return end
     if BI.isCalm(player) then
-        -- Bonus de sommeil : si l'on dort pendant la période de sérénité, la fatigue tombe plus vite
+        -- Bonus de sommeil : si l'on dort pendant la periode de serenite, la fatigue tombe plus vite
         local ok = pcall(function()
             if player:isAsleep() then
                 local st = player:getStats()
@@ -190,32 +190,54 @@ function BI.tickPlayer(player)
 end
 
 -- ---------------------------------------------------------------------------
--- Lit / canapé
+-- Lit / canape
 -- ---------------------------------------------------------------------------
-local function objectIsBed(obj)
-    if not obj or not obj.getSprite then return false end
-    local ok, res = pcall(function()
-        local sprite = obj:getSprite()
-        if sprite and sprite:getProperties() and sprite:getProperties():Is(IsoFlagType.bed) then
-            return true
+local function hasMethod(o, name)
+    return o ~= nil and o[name] ~= nil
+end
+
+local function propsAreBed(props)
+    if not props then return false end
+    if hasMethod(props, "Is") then
+        local ok, r = pcall(function() return props:Is("bed") end)
+        if ok and r == true then return true end
+        if IsoFlagType and IsoFlagType.bed then
+            ok, r = pcall(function() return props:Is(IsoFlagType.bed) end)
+            if ok and r == true then return true end
         end
-        local props = obj:getProperties()
-        return props ~= nil and props:Is(IsoFlagType.bed)
-    end)
-    if ok and res == true then return true end
-    local ok2, byName = pcall(function()
-        if obj.isBed and obj:isBed() then return true end
+    end
+    return false
+end
+
+local function objectIsBed(obj)
+    if not obj then return false end
+    -- 1) API directe si elle existe
+    if hasMethod(obj, "isBed") then
+        local ok, r = pcall(function() return obj:isBed() end)
+        if ok and r == true then return true end
+    end
+    -- 2) nom de la tuile (fiable en Build 42)
+    if hasMethod(obj, "getSprite") then
         local sprite = obj:getSprite()
-        local n = sprite and sprite:getName() or ""
-        n = string.lower(n)
-        return n:find("bedding") ~= nil or n:find("_bed") ~= nil or n:find("couch") ~= nil
-            or n:find("sofa") ~= nil or n:find("seating_indoor") ~= nil
-    end)
-    return ok2 and byName == true
+        if sprite and hasMethod(sprite, "getName") then
+            local n = string.lower(tostring(sprite:getName() or ""))
+            if n:find("bedding") or n:find("_bed") or n:find("couch") or n:find("sofa") or n:find("seating_indoor") then
+                return true
+            end
+        end
+        -- 3) proprietes du sprite, seulement si la methode existe
+        if sprite and hasMethod(sprite, "getProperties") then
+            if propsAreBed(sprite:getProperties()) then return true end
+        end
+    end
+    if hasMethod(obj, "getProperties") then
+        if propsAreBed(obj:getProperties()) then return true end
+    end
+    return false
 end
 BI.objectIsBed = objectIsBed
 
--- Qualité du lit : "goodBed", "averageBed", "badBed" (défaut averageBed)
+-- Qualite du lit : "goodBed", "averageBed", "badBed" (defaut averageBed)
 function BI.bedQuality(bed)
     local ok, q = pcall(function()
         local sprite = bed:getSprite()
@@ -228,7 +250,7 @@ function BI.bedQuality(bed)
     return "averageBed"
 end
 
--- Cherche un lit parmi les objets cliqués, sinon dans le 3x3 autour du joueur
+-- Cherche un lit parmi les objets cliques, sinon dans le 3x3 autour du joueur
 function BI.findBed(player, worldobjects)
     if worldobjects then
         for _, obj in ipairs(worldobjects) do
@@ -254,7 +276,7 @@ function BI.findBed(player, worldobjects)
 end
 
 -- ---------------------------------------------------------------------------
--- Vérifications
+-- Verifications
 -- ---------------------------------------------------------------------------
 function BI.zombieNear(player)
     local radius = BI.opt("ZombieRadius", 10)
@@ -284,9 +306,9 @@ function BI.playerNear(player, radius, exclude)
     return false
 end
 
--- Retourne ok, cléMessage, lit
+-- Retourne ok, cleMessage, lit
 function BI.canRelax(player, partner, worldobjects)
-    -- Toujours possible, même à 0 % (plaisir / anti-ennui), mais pas à répétition
+    -- Toujours possible, meme a 0 % (plaisir / anti-ennui), mais pas a repetition
     local last = player:getModData()[BI.KEY_LAST]
     if last and worldHours() < last + BI.opt("CooldownHours", 2) then
         return false, "IGUI_BesoinIntime_NoDesire"
@@ -303,10 +325,19 @@ function BI.canRelax(player, partner, worldobjects)
         return false, "IGUI_BesoinIntime_NoBed"
     end
     local stats = player:getStats()
-    if stats:getFatigue() > 0.85 then
+    if hasMethod(stats, "getFatigue") and stats:getFatigue() > 0.85 then
         return false, "IGUI_BesoinIntime_TooTired"
     end
-    if stats:getHunger() > 0.7 or stats:getThirst() > 0.7 then
+    -- Faim / soif : les accesseurs varient selon la version, on ne teste que ceux qui existent
+    local hunger, thirst = 0, 0
+    if hasMethod(stats, "getHunger") then hunger = stats:getHunger() or 0 end
+    if hasMethod(stats, "getThirst") then
+        thirst = stats:getThirst() or 0
+    else
+        local bd = player:getBodyDamage()
+        if hasMethod(bd, "getThirst") then thirst = bd:getThirst() or 0 end
+    end
+    if hunger > 0.7 or thirst > 0.7 then
         return false, "IGUI_BesoinIntime_TooHungry"
     end
     if BI.opt("ZombieCheck", true) and BI.zombieNear(player) then
@@ -326,7 +357,7 @@ function BI.applyRelief(player, withPartner, bedQuality)
     local mult = withPartner and BI.opt("PartnerBonus", 1.5) or 1.0
     if bedQuality == "goodBed" then mult = mult * 1.2
     elseif bedQuality == "badBed" then mult = mult * 0.8 end
-    -- Effet réduit quand la jauge est basse (plaisir sans besoin) : de 40 % à 100 %
+    -- Effet reduit quand la jauge est basse (plaisir sans besoin) : de 40 % a 100 %
     local need = BI.getNeed(player)
     local pleasure = BI.opt("LowNeedEffect", 0.4)
     mult = mult * (pleasure + (1 - pleasure) * (need / 100))

@@ -1,4 +1,4 @@
--- Besoin Intime — relais serveur des propositions entre joueurs (multijoueur)
+-- Besoin Intime - relais serveur des propositions entre joueurs (multijoueur)
 require "BesoinIntime_Shared"
 local BI = BesoinIntime
 

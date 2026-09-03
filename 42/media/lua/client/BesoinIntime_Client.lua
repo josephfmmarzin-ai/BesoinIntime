@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 2.2.1 — action, menu contextuel, panneau, multijoueur (client) — Build 42
+-- Besoin Intime 2.2.2 - action, menu contextuel, panneau, multijoueur (client) - Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -15,7 +15,7 @@ local function halo(player, key, r, g, b)
 end
 
 -- ---------------------------------------------------------------------------
--- Action chronométrée (aucune animation, barre de progression standard)
+-- Action chronometree (aucune animation, barre de progression standard)
 -- ---------------------------------------------------------------------------
 ISBesoinIntimeAction = ISBaseTimedAction:derive("ISBesoinIntimeAction")
 
@@ -69,7 +69,7 @@ end
 function BI.startAction(player, withPartner, bed)
     local quality = bed and BI.bedQuality(bed) or "averageBed"
     if bed and bed:getSquare() then
-        -- Marcher jusque sur le lit (pose assise dessus), sinon à côté
+        -- Marcher jusque sur le lit (pose assise dessus), sinon a cote
         local ok = pcall(function()
             ISTimedActionQueue.add(ISWalkToTimedAction:new(player, bed:getSquare()))
         end)
@@ -81,7 +81,7 @@ function BI.startAction(player, withPartner, bed)
 end
 
 -- ---------------------------------------------------------------------------
--- Panneau (jauge), déplaçable
+-- Panneau (jauge), deplacable
 -- ---------------------------------------------------------------------------
 BesoinIntimePanel = ISPanel:derive("BesoinIntimePanel")
 BI.panel = nil
@@ -146,7 +146,7 @@ function BI.togglePanel()
 end
 
 -- ---------------------------------------------------------------------------
--- Moodle intégré (icône dans la colonne de droite, déplaçable, info-bulle)
+-- Moodle integre (icone dans la colonne de droite, deplacable, info-bulle)
 -- ---------------------------------------------------------------------------
 BesoinIntimeMoodle = ISPanel:derive("BesoinIntimeMoodle")
 BI.moodle = nil
@@ -292,7 +292,7 @@ local function fillContextMenu(playerNum, context, worldobjects, test)
         if obj and obj:getSquare() then square = obj:getSquare(); break end
     end
 
-    -- Le menu n'apparaît que sur un lit/canapé cliqué, à côté d'un lit,
+    -- Le menu n'apparait que sur un lit/canape clique, a cote d'un lit,
     -- ou sur un autre joueur (multi).
     local bed = BI.findBed(player, worldobjects)
     local others = {}
@@ -340,7 +340,7 @@ end
 Events.OnFillWorldObjectContextMenu.Add(onFillWorldObjectContextMenu)
 
 -- ---------------------------------------------------------------------------
--- Multijoueur : réception des propositions / réponses
+-- Multijoueur : reception des propositions / reponses
 -- ---------------------------------------------------------------------------
 local function onServerCommand(module, command, args)
     if module ~= BI.MODULE or not args then return end
@@ -379,7 +379,7 @@ end
 Events.OnServerCommand.Add(onServerCommand)
 
 -- ---------------------------------------------------------------------------
--- Tick 10 minutes de jeu + création du panneau
+-- Tick 10 minutes de jeu + creation du panneau
 -- ---------------------------------------------------------------------------
 Events.EveryTenMinutes.Add(function()
     for i = 0, getNumActivePlayers() - 1 do
