@@ -4,7 +4,7 @@
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "3.2.0"
+BI.VERSION   = "3.2.1"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
 BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'a la fin de la serenite
@@ -22,20 +22,62 @@ BI.clamp = clamp
 -- cette version du jeu (plusieurs accesseurs ont disparu en Build 42).
 -- Journalise une seule fois chaque accesseur manquant.
 BI.missing = {}
-function BI.adjust(obj, getter, setter, delta, lo, hi)
-    if obj == nil then return false end
-    if obj[getter] == nil or obj[setter] == nil then
-        local key = getter .. "/" .. setter
-        if not BI.missing[key] then
-            BI.missing[key] = true
-            print("[BesoinIntime] stat accessor not available in this build: " .. key)
-        end
-        return false
+
+-- Nom CharacterStat (Build 42.13+) associe a chaque ancien accesseur
+local STAT_NAME = {
+    getStress = "STRESS", getPanic = "PANIC", getFatigue = "FATIGUE",
+    getHunger = "HUNGER", getThirst = "THIRST",
+    getUnhappynessLevel = "UNHAPPINESS", getBoredomLevel = "BOREDOM",
+}
+
+local function logMissing(key)
+    if not BI.missing[key] then
+        BI.missing[key] = true
+        print("[BesoinIntime] stat accessor not available in this build: " .. key)
     end
-    local ok = pcall(function()
-        obj[setter](obj, clamp((obj[getter](obj) or 0) + delta, lo, hi))
-    end)
-    return ok
+end
+
+-- Lecture d'une statistique : CharacterStat en priorite, sinon ancien accesseur.
+function BI.getStat(player, getter)
+    local stats = player:getStats()
+    local statName = STAT_NAME[getter]
+    if statName and CharacterStat and CharacterStat[statName] and stats and stats.get then
+        local ok, v = pcall(function() return stats:get(CharacterStat[statName]) end)
+        if ok and v ~= nil then return v end
+    end
+    local objs = { stats, player:getBodyDamage() }
+    for _, obj in ipairs(objs) do
+        if obj and obj[getter] then
+            local ok, v = pcall(function() return obj[getter](obj) end)
+            if ok and v ~= nil then return v end
+        end
+    end
+    logMissing(getter)
+    return nil
+end
+
+-- Modification d'une statistique (delta borne). Retourne true si appliquee.
+function BI.adjust(player, getter, setter, delta, lo, hi)
+    local stats = player:getStats()
+    local statName = STAT_NAME[getter]
+    if statName and CharacterStat and CharacterStat[statName] and stats and stats.get and stats.set then
+        local ok = pcall(function()
+            local v = stats:get(CharacterStat[statName]) or 0
+            stats:set(CharacterStat[statName], clamp(v + delta, lo, hi))
+        end)
+        if ok then return true end
+    end
+    local objs = { stats, player:getBodyDamage() }
+    for _, obj in ipairs(objs) do
+        if obj and obj[getter] and obj[setter] then
+            local ok = pcall(function()
+                obj[setter](obj, clamp((obj[getter](obj) or 0) + delta, lo, hi))
+            end)
+            if ok then return true end
+        end
+    end
+    logMissing(getter .. "/" .. setter)
+    return false
 end
 
 -- Option Sandbox avec valeur de secours
@@ -227,7 +269,7 @@ function BI.tickPlayer(player)
         -- Bonus de sommeil : si l'on dort pendant la periode de serenite, la fatigue tombe plus vite
         local ok = pcall(function()
             if player:isAsleep() then
-                BI.adjust(player:getStats(), "getFatigue", "setFatigue", -BI.opt("SleepBonus", 0.01), 0, 1)
+                BI.adjust(player, "getFatigue", "setFatigue", -BI.opt("SleepBonus", 0.01), 0, 1)
             end
         end)
         return
@@ -239,9 +281,9 @@ function BI.tickPlayer(player)
 
     if need > 50 then
         local ratio = (need - 50) / 50
-        BI.adjust(player:getStats(), "getStress", "setStress", BI.opt("StressPerTick", 0.005) * ratio, 0, 1)
+        BI.adjust(player, "getStress", "setStress", BI.opt("StressPerTick", 0.005) * ratio, 0, 1)
         if need > 75 then
-            BI.adjust(player:getBodyDamage(), "getUnhappynessLevel", "setUnhappynessLevel", 0.25 * ratio, 0, 100)
+            BI.adjust(player, "getUnhappynessLevel", "setUnhappynessLevel", 0.25 * ratio, 0, 100)
         end
     end
 end
@@ -407,19 +449,12 @@ function BI.canRelax(player, partner, worldobjects)
             return false, "IGUI_BesoinIntime_NoBed"
         end
     end
-    local stats = player:getStats()
-    if hasMethod(stats, "getFatigue") and stats:getFatigue() > 0.85 then
+    local fatigue = BI.getStat(player, "getFatigue") or 0
+    if fatigue > 0.85 then
         return false, "IGUI_BesoinIntime_TooTired"
     end
-    -- Faim / soif : les accesseurs varient selon la version, on ne teste que ceux qui existent
-    local hunger, thirst = 0, 0
-    if hasMethod(stats, "getHunger") then hunger = stats:getHunger() or 0 end
-    if hasMethod(stats, "getThirst") then
-        thirst = stats:getThirst() or 0
-    else
-        local bd = player:getBodyDamage()
-        if hasMethod(bd, "getThirst") then thirst = bd:getThirst() or 0 end
-    end
+    local hunger = BI.getStat(player, "getHunger") or 0
+    local thirst = BI.getStat(player, "getThirst") or 0
     if hunger > 0.7 or thirst > 0.7 then
         return false, "IGUI_BesoinIntime_TooHungry"
     end
@@ -445,13 +480,11 @@ function BI.applyRelief(player, withPartner, bedQuality)
     local pleasure = BI.opt("LowNeedEffect", 0.4)
     mult = mult * (pleasure + (1 - pleasure) * (need / 100))
 
-    local stats = player:getStats()
-    local bd = player:getBodyDamage()
-    BI.adjust(stats, "getStress", "setStress", -BI.opt("StressRelief", 0.35) * mult, 0, 1)
-    BI.adjust(stats, "getPanic", "setPanic", -10 * mult, 0, 100)
-    BI.adjust(bd, "getUnhappynessLevel", "setUnhappynessLevel", -BI.opt("UnhappyRelief", 12) * mult, 0, 100)
-    BI.adjust(bd, "getBoredomLevel", "setBoredomLevel", -BI.opt("BoredomRelief", 20) * mult, 0, 100)
-    BI.adjust(stats, "getFatigue", "setFatigue", 0.05, 0, 1)
+    BI.adjust(player, "getStress", "setStress", -BI.opt("StressRelief", 0.35) * mult, 0, 1)
+    BI.adjust(player, "getPanic", "setPanic", -10 * mult, 0, 100)
+    BI.adjust(player, "getUnhappynessLevel", "setUnhappynessLevel", -BI.opt("UnhappyRelief", 12) * mult, 0, 100)
+    BI.adjust(player, "getBoredomLevel", "setBoredomLevel", -BI.opt("BoredomRelief", 20) * mult, 0, 100)
+    BI.adjust(player, "getFatigue", "setFatigue", 0.05, 0, 1)
     BI.setNeed(player, 0)
     player:getModData()[BI.KEY_CALM] = worldHours() + BI.opt("CalmHours", 3)
     player:getModData()[BI.KEY_LAST] = worldHours()
