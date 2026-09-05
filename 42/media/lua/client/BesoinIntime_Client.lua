@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 3.0.1 - action, menu contextuel, panneau, multijoueur (client) - Build 42
+-- Besoin Intime 3.1.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -19,9 +19,22 @@ end
 -- ---------------------------------------------------------------------------
 -- On derive de l'action vanilla "s'asseoir par terre" quand elle existe : le
 -- personnage prend la pose assise sur le lit pendant l'action. Sinon, action simple.
+-- Base preferee : ISRestAction ("Se reposer", allonge sur un lit / assis sur un
+-- fauteuil, avec animations vanilla), sinon ISSitOnGround, sinon action simple.
 local SitBase = nil
+BI.baseKind = "plain"
+pcall(function() require "TimedActions/ISRestAction" end)
 pcall(function() require "TimedActions/ISSitOnGround" end)
-if BI.opt("SitPose", true) and ISSitOnGround and ISSitOnGround.new then SitBase = ISSitOnGround end
+if BI.opt("SitPose", true) then
+    if ISRestAction and ISRestAction.new then
+        SitBase = ISRestAction
+        BI.baseKind = "rest"
+    elseif ISSitOnGround and ISSitOnGround.new then
+        SitBase = ISSitOnGround
+        BI.baseKind = "sit"
+    end
+end
+print("[BesoinIntime] action base: " .. BI.baseKind)
 local ActionBase = SitBase or ISBaseTimedAction
 
 ISBesoinIntimeAction = ActionBase:derive("ISBesoinIntimeAction")
@@ -93,7 +106,12 @@ end
 function ISBesoinIntimeAction:new(character, withPartner, bedQuality, bed)
     local o
     if SitBase and not character:getVehicle() then
-        local ok, res = pcall(SitBase.new, self, character, bed)
+        local ok, res
+        if BI.baseKind == "rest" then
+            ok, res = pcall(SitBase.new, self, character, bed, true)
+        else
+            ok, res = pcall(SitBase.new, self, character, bed)
+        end
         if ok and res then o = res else o = ISBaseTimedAction.new(self, character); o.usesSit = false end
     else
         o = ISBaseTimedAction.new(self, character)
@@ -115,10 +133,18 @@ end
 function BI.startAction(player, withPartner, bed)
     local quality = bed and BI.bedQuality(bed) or "averageBed"
     if bed and bed:getSquare() and not player:getVehicle() then
-        -- Marcher jusque sur le lit (pose assise dessus), sinon a cote
-        local ok = pcall(function()
-            ISTimedActionQueue.add(ISWalkToTimedAction:new(player, bed:getSquare()))
-        end)
+        -- Se deplacer vers le meuble comme le fait "Se reposer" (chemin vanilla)
+        local ok = false
+        if BI.baseKind == "rest" and ISPathFindAction and ISPathFindAction.pathToSitOnFurniture then
+            ok = pcall(function()
+                ISTimedActionQueue.add(ISPathFindAction:pathToSitOnFurniture(player, bed, true))
+            end)
+        end
+        if not ok then
+            ok = pcall(function()
+                ISTimedActionQueue.add(ISWalkToTimedAction:new(player, bed:getSquare()))
+            end)
+        end
         if not ok and luautils and luautils.walkAdj then
             luautils.walkAdj(player, bed:getSquare(), true)
         end

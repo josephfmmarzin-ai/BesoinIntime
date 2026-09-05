@@ -122,24 +122,24 @@ option BesoinIntime.CensorEnabled
 
 option BesoinIntime.CensorWidth
 {
-	type = integer, min = 10, max = 120, default = 34,
+	type = integer, min = 4, max = 120, default = 18,
 	page = BesoinIntime, translation = BesoinIntime_CensorWidth,
 }
 
 option BesoinIntime.CensorHeight
 {
-	type = integer, min = 4, max = 80, default = 16,
+	type = integer, min = 2, max = 80, default = 8,
 	page = BesoinIntime, translation = BesoinIntime_CensorHeight,
 }
 
 option BesoinIntime.CensorOffsetY
 {
-	type = integer, min = -60, max = 160, default = 26,
+	type = integer, min = -60, max = 160, default = 22,
 	page = BesoinIntime, translation = BesoinIntime_CensorOffsetY,
 }
 
 option BesoinIntime.CensorOffsetYVehicle
 {
-	type = integer, min = -60, max = 160, default = 30,
+	type = integer, min = -60, max = 160, default = 28,
 	page = BesoinIntime, translation = BesoinIntime_CensorOffsetYVehicle,
 }

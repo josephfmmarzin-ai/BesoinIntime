@@ -1,7 +1,7 @@
 name=Besoin Intime / Intimate Need
 id=BesoinIntime
 poster=poster.png
-modversion=3.0.1
+modversion=3.1.0
 authors=josephfmmarzin-ai
 url=https://github.com/josephfmmarzin-ai/BesoinIntime
 description=[FR] Ajoute un besoin intime realiste : une jauge monte avec le temps et fait grimper le stress et la tristesse si on l'ignore. On y repond a l'interieur, sur un lit ou un canape, seul ou avec un autre joueur (multi). Aucune animation, aucun contenu explicite. Panneau discret (touche J), options Sandbox, FR/EN.

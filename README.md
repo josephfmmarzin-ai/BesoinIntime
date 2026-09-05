@@ -14,10 +14,10 @@ Ajoute un **besoin intime réaliste** au personnage : une jauge cachée monte av
 ### Installation
 **Steam Workshop** (recommandé) : [s'abonner au mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), puis l'activer dans le Mod Manager.
 
-**Manuelle** : télécharger `BesoinIntime-v3.0.1.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
+**Manuelle** : télécharger `BesoinIntime-v3.1.0.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
 
 ### Utilisation
-- **Clic droit sur un lit, canapé, fauteuil, chaise** (ou juste à côté), ou **dans un véhicule à l'arrêt** → **Besoin intime** → *Prendre un moment pour soi*. Pendant le moment : pose assise, cache noir, petit son en boucle, puis souffle + carillon.
+- **Clic droit sur un lit, canapé, fauteuil, chaise** (ou juste à côté), ou **dans un véhicule à l'arrêt** → **Besoin intime** → *Prendre un moment pour soi*. Pendant le moment : allongé sur un lit / assis sur un fauteuil (animations vanilla de « Se reposer »), cache noir, petit son en boucle, puis souffle + carillon.
 - **Clic droit sur un autre joueur** (multi) → *Proposer un moment intime à …* ; il reçoit une fenêtre Oui / Non.
 - **Icône de moodle** dans la colonne de droite à partir de 70 % de besoin (orange → rouge, seuil réglable), verte pendant la sérénité ; survol = description ; déplaçable.
 - **Touche J** : afficher la jauge détaillée (masquée par défaut, modifiable dans *Options → Touches*).
@@ -56,10 +56,10 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 ### Install
 **Steam Workshop** (recommended): [subscribe](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), then enable it in the Mod Manager.
 
-**Manual**: download `BesoinIntime-v3.0.1.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
+**Manual**: download `BesoinIntime-v3.1.0.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
 
 ### Usage
-- **Right-click a bed, couch, armchair, chair** (or stand next to one), or **in a parked vehicle** → **Intimate need** → *Take some time for yourself*. During the moment: sitting pose, black censor box, small looping sound, then a sigh + chime.
+- **Right-click a bed, couch, armchair, chair** (or stand next to one), or **in a parked vehicle** → **Intimate need** → *Take some time for yourself*. During the moment: lying on a bed / sitting on a chair (vanilla 'Rest' animations), black censor box, small looping sound, then a sigh + chime.
 - **Right-click another player** (MP) → *Propose an intimate moment to …*; they get a Yes / No dialog.
 - **Moodle icon** in the right column from 70 % need (orange → red, threshold tunable), green during serenity; hover for details; draggable.
 - **J key**: show the detailed gauge (hidden by default, rebindable in *Options → Keys*).
@@ -81,6 +81,7 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 ---
 
 ## Changelog
+- **3.1.0** — The action now derives from the vanilla 'Rest' action (`ISRestAction`): the character lies down on beds and sits on chairs/couches with vanilla animations, walking to the furniture like 'Rest' does. Fixed the last Build 42 API error (bed quality). Automatic detection of the engine's text encoding for accents. Smaller censor box by default.
 - **3.0.1** — Fix: the censor overlay blocked right-clicks on the world (fullscreen UI element); it is now 0x0 and never captures the mouse. Removed duplicate translations from `common/`.
 - **3.0.0** — Works on any seat: beds (single, double, bunk), couches, armchairs, chairs, benches, and parked vehicles (engine on or off). Vanilla sitting pose on furniture. Black censor box drawn over the character during the moment, synced to other players in MP. Sounds: looping 'tortoise' squeaks during the moment, relief sigh + chime at the end (synthesized, heard by nearby players). All tunable/disable-able in Sandbox.
 - **2.3.0** — The action now derives from the vanilla `ISSitOnGround` action: the character really sits on the bed during the moment (same pose as 'Sit on ground'), then stands up. Falls back to a plain timed action if unavailable.

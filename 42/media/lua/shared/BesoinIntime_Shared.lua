@@ -4,7 +4,7 @@
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "3.0.1"
+BI.VERSION   = "3.1.0"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
 BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'a la fin de la serenite
@@ -114,6 +114,31 @@ local function currentLang()
     return "EN"
 end
 
+-- Detection du format d'accents attendu par le moteur : on mesure un texte
+-- vanilla accentue ("D\233monter"). 8 = caracteres, 9 = octets UTF-8.
+BI.encMode = nil
+local function encMode()
+    if BI.encMode then return BI.encMode end
+    BI.encMode = "char"
+    pcall(function()
+        local probe = getText("ContextMenu_Disassemble")
+        if probe and probe:find("^D.monter") then
+            if #probe >= 9 then BI.encMode = "utf8" end
+        end
+    end)
+    print("[BesoinIntime] text encoding mode: " .. BI.encMode)
+    return BI.encMode
+end
+
+local function toEngineEncoding(str)
+    if encMode() ~= "utf8" then return str end
+    return (str:gsub("[\128-\255]", function(ch)
+        local c = string.byte(ch)
+        return string.char(192 + math.floor(c / 64), 128 + (c % 64))
+    end))
+end
+BI.toEngineEncoding = toEngineEncoding
+
 -- Texte traduit, avec secours integre si le fichier Translate est absent.
 function BI.T(key, ...)
     local args = { ... }
@@ -125,7 +150,7 @@ function BI.T(key, ...)
     for i, v in ipairs(args) do
         s = s:gsub("%%" .. i, tostring(v))
     end
-    return s
+    return toEngineEncoding(s)
 end
 
 -- ---------------------------------------------------------------------------
@@ -245,9 +270,26 @@ BI.objectIsBed = objectIsBed
 -- Qualite du lit : "goodBed", "averageBed", "badBed" (defaut averageBed)
 function BI.bedQuality(bed)
     local ok, q = pcall(function()
+        if not bed or not bed.getSprite then return nil end
         local sprite = bed:getSprite()
-        if sprite and sprite:getProperties() and sprite:getProperties():Is("BedType") then
-            return sprite:getProperties():Val("BedType")
+        if sprite and sprite.getProperties then
+            local props = sprite:getProperties()
+            if props and props.Is and props.Val and props:Is("BedType") then
+                return props:Val("BedType")
+            end
+        end
+        if bed.getProperties then
+            local props = bed:getProperties()
+            if props and props.Is and props.Val and props:Is("BedType") then
+                return props:Val("BedType")
+            end
+        end
+        -- Heuristique par nom de tuile
+        if sprite and sprite.getName then
+            local n = string.lower(tostring(sprite:getName() or ""))
+            if n:find("bedding") or n:find("_bed") then return "averageBed" end
+            if n:find("couch") or n:find("sofa") then return "averageBed" end
+            if n:find("chair") or n:find("stool") or n:find("bench") then return "badBed" end
         end
         return nil
     end)
