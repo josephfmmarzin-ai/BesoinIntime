@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 3.0.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
+-- Besoin Intime 3.0.1 - action, menu contextuel, panneau, multijoueur (client) - Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -210,17 +210,23 @@ end
 BesoinIntimeCensor = ISUIElement:derive("BesoinIntimeCensor")
 BI.censor = nil
 
+-- Taille 0x0 : l'element dessine hors de ses limites mais ne peut jamais
+-- intercepter la souris (sinon le clic droit sur le monde est bloque).
 function BesoinIntimeCensor:new()
-    local o = ISUIElement:new(0, 0, getCore():getScreenWidth(), getCore():getScreenHeight())
+    local o = ISUIElement:new(0, 0, 0, 0)
     setmetatable(o, self)
     self.__index = self
+    o.wantKeyEvents = false
     return o
 end
 
+function BesoinIntimeCensor:isMouseOver() return false end
 function BesoinIntimeCensor:onMouseDown() return false end
 function BesoinIntimeCensor:onMouseUp() return false end
+function BesoinIntimeCensor:onRightMouseDown() return false end
+function BesoinIntimeCensor:onRightMouseUp() return false end
 function BesoinIntimeCensor:onMouseMove() return false end
-function BesoinIntimeCensor:isMouseOver() return false end
+function BesoinIntimeCensor:onMouseWheel() return false end
 
 local function drawCensorFor(self, player, playerNum)
     if not player or player:isDead() then return end
@@ -265,7 +271,8 @@ function BI.createCensor()
     BI.censor:initialise()
     BI.censor:addToUIManager()
     BI.censor:setVisible(true)
-    BI.censor:setCapture(false)
+    pcall(function() BI.censor:setCapture(false) end)
+    pcall(function() BI.censor:setWantKeyEvents(false) end)
 end
 
 -- ---------------------------------------------------------------------------

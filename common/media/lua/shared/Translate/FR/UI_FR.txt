@@ -1,4 +1,0 @@
-UI_FR = {
-	UI_optionscreen_binding_[BesoinIntime] = "Besoin intime",
-	UI_optionscreen_binding_Toggle BesoinIntime Panel = "Afficher / masquer la jauge",
-}

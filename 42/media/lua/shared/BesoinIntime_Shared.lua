@@ -4,7 +4,7 @@
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "3.0.0"
+BI.VERSION   = "3.0.1"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
 BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'a la fin de la serenite
