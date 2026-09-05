@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 3.1.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
+-- Besoin Intime 3.2.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -265,8 +265,8 @@ local function drawCensorFor(self, player, playerNum)
     sy = (sy - IsoCamera.getOffY()) / zoom
     local w = BI.opt("CensorWidth", 34) / zoom
     local h = BI.opt("CensorHeight", 16) / zoom
-    local dy = BI.opt("CensorOffsetY", 26) / zoom
-    if player:getVehicle() then dy = BI.opt("CensorOffsetYVehicle", 30) / zoom end
+    local dy = BI.opt("CensorOffsetY", 64) / zoom
+    if player:getVehicle() then dy = BI.opt("CensorOffsetYVehicle", 70) / zoom end
     self:drawRect(sx - w / 2, sy - dy - h / 2, w, h, 1, 0, 0, 0)
 end
 

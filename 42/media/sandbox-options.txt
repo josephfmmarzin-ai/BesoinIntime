@@ -134,12 +134,12 @@ option BesoinIntime.CensorHeight
 
 option BesoinIntime.CensorOffsetY
 {
-	type = integer, min = -60, max = 160, default = 22,
+	type = integer, min = -60, max = 200, default = 64,
 	page = BesoinIntime, translation = BesoinIntime_CensorOffsetY,
 }
 
 option BesoinIntime.CensorOffsetYVehicle
 {
-	type = integer, min = -60, max = 160, default = 28,
+	type = integer, min = -60, max = 200, default = 70,
 	page = BesoinIntime, translation = BesoinIntime_CensorOffsetYVehicle,
 }

@@ -4,7 +4,7 @@
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "3.1.0"
+BI.VERSION   = "3.2.0"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
 BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'a la fin de la serenite
@@ -17,6 +17,26 @@ local function clamp(v, lo, hi)
     return v
 end
 BI.clamp = clamp
+
+-- Modifie une statistique seulement si le getter ET le setter existent dans
+-- cette version du jeu (plusieurs accesseurs ont disparu en Build 42).
+-- Journalise une seule fois chaque accesseur manquant.
+BI.missing = {}
+function BI.adjust(obj, getter, setter, delta, lo, hi)
+    if obj == nil then return false end
+    if obj[getter] == nil or obj[setter] == nil then
+        local key = getter .. "/" .. setter
+        if not BI.missing[key] then
+            BI.missing[key] = true
+            print("[BesoinIntime] stat accessor not available in this build: " .. key)
+        end
+        return false
+    end
+    local ok = pcall(function()
+        obj[setter](obj, clamp((obj[getter](obj) or 0) + delta, lo, hi))
+    end)
+    return ok
+end
 
 -- Option Sandbox avec valeur de secours
 function BI.opt(name, default)
@@ -67,38 +87,38 @@ BI.TEXTS = {
     },
     FR = {
         ContextMenu_BesoinIntime_Title = "Besoin intime",
-        ContextMenu_BesoinIntime_State = "\201tat : %1 (%2 %%)",
+        ContextMenu_BesoinIntime_State = "@201@tat : %1 (%2 %%)",
         ContextMenu_BesoinIntime_TitleState = "Besoin intime - %1 (%2 %%)",
         ContextMenu_BesoinIntime_Relax = "Prendre un moment pour soi",
-        ContextMenu_BesoinIntime_Propose = "Proposer un moment intime \224 %1",
+        ContextMenu_BesoinIntime_Propose = "Proposer un moment intime @224@ %1",
         ContextMenu_BesoinIntime_TogglePanel = "Afficher / masquer la jauge",
         IGUI_BesoinIntime_Title = "Besoin intime",
-        IGUI_BesoinIntime_Stage0 = "Combl\233(e)",
+        IGUI_BesoinIntime_Stage0 = "Combl@233@(e)",
         IGUI_BesoinIntime_Stage1 = "Serein(e)",
         IGUI_BesoinIntime_Stage2 = "En manque",
-        IGUI_BesoinIntime_Stage3 = "Frustr\233(e)",
-        IGUI_BesoinIntime_Stage4 = "Tr\232s frustr\233(e)",
-        IGUI_BesoinIntime_Calm = "Apais\233(e)",
-        IGUI_BesoinIntime_Started = "Se d\233tend...",
-        IGUI_BesoinIntime_Relieved = "Soulag\233(e)",
-        IGUI_BesoinIntime_Interrupted = "Zombies \224 proximit\233 !",
-        IGUI_BesoinIntime_NoDesire = "Pas maintenant, c'est trop t\244t depuis la derni\232re fois.",
-        IGUI_BesoinIntime_InVehicle = "Pas dans un v\233hicule.",
-        IGUI_BesoinIntime_VehicleMoving = "Arr\234tez d'abord le v\233hicule.",
-        IGUI_BesoinIntime_NoBedOrSeat = "Il faut un lit, un canap\233, un fauteuil ou un v\233hicule \224 l'arr\234t.",
-        IGUI_BesoinIntime_NotIndoors = "Il faut \234tre \224 l'int\233rieur.",
-        IGUI_BesoinIntime_NoBed = "Il faut un lit, un canap\233 ou un fauteuil \224 proximit\233.",
-        IGUI_BesoinIntime_TooTired = "Trop \233puis\233(e).",
-        IGUI_BesoinIntime_TooHungry = "Trop affam\233(e) ou assoiff\233(e).",
+        IGUI_BesoinIntime_Stage3 = "Frustr@233@(e)",
+        IGUI_BesoinIntime_Stage4 = "Tr@232@s frustr@233@(e)",
+        IGUI_BesoinIntime_Calm = "Apais@233@(e)",
+        IGUI_BesoinIntime_Started = "Se d@233@tend...",
+        IGUI_BesoinIntime_Relieved = "Soulag@233@(e)",
+        IGUI_BesoinIntime_Interrupted = "Zombies @224@ proximit@233@ !",
+        IGUI_BesoinIntime_NoDesire = "Pas maintenant, c'est trop t@244@t depuis la derni@232@re fois.",
+        IGUI_BesoinIntime_InVehicle = "Pas dans un v@233@hicule.",
+        IGUI_BesoinIntime_VehicleMoving = "Arr@234@tez d'abord le v@233@hicule.",
+        IGUI_BesoinIntime_NoBedOrSeat = "Il faut un lit, un canap@233@, un fauteuil ou un v@233@hicule @224@ l'arr@234@t.",
+        IGUI_BesoinIntime_NotIndoors = "Il faut @234@tre @224@ l'int@233@rieur.",
+        IGUI_BesoinIntime_NoBed = "Il faut un lit, un canap@233@ ou un fauteuil @224@ proximit@233@.",
+        IGUI_BesoinIntime_TooTired = "Trop @233@puis@233@(e).",
+        IGUI_BesoinIntime_TooHungry = "Trop affam@233@(e) ou assoiff@233@(e).",
         IGUI_BesoinIntime_ZombiesNear = "Des zombies sont trop proches.",
-        IGUI_BesoinIntime_NoPrivacy = "Quelqu'un d'autre est \224 proximit\233.",
-        IGUI_BesoinIntime_ProposalSent = "Proposition envoy\233e...",
+        IGUI_BesoinIntime_NoPrivacy = "Quelqu'un d'autre est @224@ proximit@233@.",
+        IGUI_BesoinIntime_ProposalSent = "Proposition envoy@233@e...",
         IGUI_BesoinIntime_ProposalReceived = "%1 vous propose un moment intime. Accepter ?",
-        IGUI_BesoinIntime_Declined = "Proposition refus\233e.",
-        IGUI_BesoinIntime_MoodleCalm = "Apais\233(e). Le besoin ne remonte pas pendant un moment, et le sommeil est plus r\233parateur.",
-        IGUI_BesoinIntime_MoodleDesc2 = "En manque. Un lit ou un canap\233, \224 l'int\233rieur, ferait du bien.",
-        IGUI_BesoinIntime_MoodleDesc3 = "Frustr\233(e). Le stress s'accumule. Trouvez un peu d'intimit\233.",
-        IGUI_BesoinIntime_MoodleDesc4 = "Tr\232s frustr\233(e). Le stress et la tristesse continuent de monter.",
+        IGUI_BesoinIntime_Declined = "Proposition refus@233@e.",
+        IGUI_BesoinIntime_MoodleCalm = "Apais@233@(e). Le besoin ne remonte pas pendant un moment, et le sommeil est plus r@233@parateur.",
+        IGUI_BesoinIntime_MoodleDesc2 = "En manque. Un lit ou un canap@233@, @224@ l'int@233@rieur, ferait du bien.",
+        IGUI_BesoinIntime_MoodleDesc3 = "Frustr@233@(e). Le stress s'accumule. Trouvez un peu d'intimit@233@.",
+        IGUI_BesoinIntime_MoodleDesc4 = "Tr@232@s frustr@233@(e). Le stress et la tristesse continuent de monter.",
     },
 }
 
@@ -126,11 +146,22 @@ local function encMode()
             if #probe >= 9 then BI.encMode = "utf8" end
         end
     end)
-    print("[BesoinIntime] text encoding mode: " .. BI.encMode)
+    pcall(function()
+        print("[BesoinIntime] text encoding mode: " .. BI.encMode
+            .. " | probe=" .. tostring(getText("ContextMenu_Disassemble"))
+            .. " | test=" .. string.char(233) .. " | lang=" .. tostring(currentLang()))
+    end)
     return BI.encMode
 end
 
+-- Les accents des textes de secours sont ecrits @233@ et convertis ici via
+-- string.char, ce qui donne toujours le bon caractere Java.
+local function decodeAccents(str)
+    return (str:gsub("@(%d%d%d)@", function(d) return string.char(tonumber(d)) end))
+end
+
 local function toEngineEncoding(str)
+    str = decodeAccents(str)
     if encMode() ~= "utf8" then return str end
     return (str:gsub("[\128-\255]", function(ch)
         local c = string.byte(ch)
@@ -196,8 +227,7 @@ function BI.tickPlayer(player)
         -- Bonus de sommeil : si l'on dort pendant la periode de serenite, la fatigue tombe plus vite
         local ok = pcall(function()
             if player:isAsleep() then
-                local st = player:getStats()
-                st:setFatigue(clamp(st:getFatigue() - BI.opt("SleepBonus", 0.01), 0, 1))
+                BI.adjust(player:getStats(), "getFatigue", "setFatigue", -BI.opt("SleepBonus", 0.01), 0, 1)
             end
         end)
         return
@@ -209,11 +239,9 @@ function BI.tickPlayer(player)
 
     if need > 50 then
         local ratio = (need - 50) / 50
-        local stats = player:getStats()
-        stats:setStress(clamp(stats:getStress() + BI.opt("StressPerTick", 0.005) * ratio, 0, 1))
+        BI.adjust(player:getStats(), "getStress", "setStress", BI.opt("StressPerTick", 0.005) * ratio, 0, 1)
         if need > 75 then
-            local bd = player:getBodyDamage()
-            bd:setUnhappynessLevel(clamp(bd:getUnhappynessLevel() + 0.25 * ratio, 0, 100))
+            BI.adjust(player:getBodyDamage(), "getUnhappynessLevel", "setUnhappynessLevel", 0.25 * ratio, 0, 100)
         end
     end
 end
@@ -419,11 +447,11 @@ function BI.applyRelief(player, withPartner, bedQuality)
 
     local stats = player:getStats()
     local bd = player:getBodyDamage()
-    stats:setStress(clamp(stats:getStress() - BI.opt("StressRelief", 0.35) * mult, 0, 1))
-    stats:setPanic(clamp(stats:getPanic() - 10 * mult, 0, 100))
-    bd:setUnhappynessLevel(clamp(bd:getUnhappynessLevel() - BI.opt("UnhappyRelief", 12) * mult, 0, 100))
-    bd:setBoredomLevel(clamp(bd:getBoredomLevel() - BI.opt("BoredomRelief", 20) * mult, 0, 100))
-    stats:setFatigue(clamp(stats:getFatigue() + 0.05, 0, 1))
+    BI.adjust(stats, "getStress", "setStress", -BI.opt("StressRelief", 0.35) * mult, 0, 1)
+    BI.adjust(stats, "getPanic", "setPanic", -10 * mult, 0, 100)
+    BI.adjust(bd, "getUnhappynessLevel", "setUnhappynessLevel", -BI.opt("UnhappyRelief", 12) * mult, 0, 100)
+    BI.adjust(bd, "getBoredomLevel", "setBoredomLevel", -BI.opt("BoredomRelief", 20) * mult, 0, 100)
+    BI.adjust(stats, "getFatigue", "setFatigue", 0.05, 0, 1)
     BI.setNeed(player, 0)
     player:getModData()[BI.KEY_CALM] = worldHours() + BI.opt("CalmHours", 3)
     player:getModData()[BI.KEY_LAST] = worldHours()
