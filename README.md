@@ -14,7 +14,7 @@ Ajoute un **besoin intime réaliste** au personnage : une jauge cachée monte av
 ### Installation
 **Steam Workshop** (recommandé) : [s'abonner au mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), puis l'activer dans le Mod Manager.
 
-**Manuelle** : télécharger `BesoinIntime-v3.2.1.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
+**Manuelle** : télécharger `BesoinIntime-v3.3.0.zip` dans la [dernière release](../../releases/latest), dézipper, et copier le dossier `BesoinIntime` dans `C:\Users\<toi>\Zomboid\mods\`. Le dossier doit contenir `mod.info`, `42/` et `common/`. Activer *Besoin Intime* dans le Mod Manager. En multijoueur, le serveur doit aussi avoir le mod.
 
 ### Utilisation
 - **Clic droit sur un lit, canapé, fauteuil, chaise** (ou juste à côté), ou **dans un véhicule à l'arrêt** → **Besoin intime** → *Prendre un moment pour soi*. Pendant le moment : allongé sur un lit / assis sur un fauteuil (animations vanilla de « Se reposer »), cache noir, petit son en boucle, puis souffle + carillon.
@@ -56,7 +56,7 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 ### Install
 **Steam Workshop** (recommended): [subscribe](https://steamcommunity.com/sharedfiles/filedetails/?id=3794394776), then enable it in the Mod Manager.
 
-**Manual**: download `BesoinIntime-v3.2.1.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
+**Manual**: download `BesoinIntime-v3.3.0.zip` from the [latest release](../../releases/latest), unzip, and copy the `BesoinIntime` folder into `C:\Users\<you>\Zomboid\mods\`. The folder must contain `mod.info`, `42/` and `common/`. Enable *Besoin Intime* in the Mod Manager. In multiplayer the server needs the mod too.
 
 ### Usage
 - **Right-click a bed, couch, armchair, chair** (or stand next to one), or **in a parked vehicle** → **Intimate need** → *Take some time for yourself*. During the moment: lying on a bed / sitting on a chair (vanilla 'Rest' animations), black censor box, small looping sound, then a sigh + chime.
@@ -81,6 +81,7 @@ Adds a **realistic intimate need**: a hidden gauge rises over time and increases
 ---
 
 ## Changelog
+- **3.3.0** — Three voice clips played at random (one picked at random, random 2–5 s intervals) during the moment, heard by nearby players. Optional full black screen for the local player during the action (opacity tunable).
 - **3.2.1** — Stats now use the Build 42 `CharacterStat` API (`stats:get/set(CharacterStat.STRESS)` etc.), with fallback to the old accessors. Before this, on 42.13+ the action played but did not change stress/unhappiness/boredom/fatigue.
 - **3.2.0** — All stat accessors are now guarded (Build 42 removed some setters; no more errors at the end of the action). Accents decoded at runtime via `string.char`. Censor box raised to the pelvis (64 px default). Looping sound replaced by a rhythmic bed-spring creak with muffled breathing; replace `42/media/sound/BesoinIntime_moment.ogg` with your own file if you prefer.
 - **3.1.0** — The action now derives from the vanilla 'Rest' action (`ISRestAction`): the character lies down on beds and sits on chairs/couches with vanilla animations, walking to the furniture like 'Rest' does. Fixed the last Build 42 API error (bed quality). Automatic detection of the engine's text encoding for accents. Smaller censor box by default.

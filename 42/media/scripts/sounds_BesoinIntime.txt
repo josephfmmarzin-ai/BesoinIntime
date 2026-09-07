@@ -28,3 +28,35 @@ module Base
 		}
 	}
 }
+
+module Base
+{
+	/* Voix : un clip choisi au hasard a chaque lecture */
+	sound BesoinIntime_Voice
+	{
+		category = Player,
+		loop = false,
+		is3D = true,
+		clip
+		{
+			file = media/sound/BesoinIntime_voice1.ogg,
+			distanceMin = 1,
+			distanceMax = 12,
+			volume = 0.9,
+		}
+		clip
+		{
+			file = media/sound/BesoinIntime_voice2.ogg,
+			distanceMin = 1,
+			distanceMax = 12,
+			volume = 0.9,
+		}
+		clip
+		{
+			file = media/sound/BesoinIntime_voice3.ogg,
+			distanceMin = 1,
+			distanceMax = 12,
+			volume = 0.9,
+		}
+	}
+}

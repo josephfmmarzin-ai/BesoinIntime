@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 3.2.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
+-- Besoin Intime 3.3.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -57,9 +57,24 @@ function ISBesoinIntimeAction:waitToStart()
     return false
 end
 
+local function nextVoiceDelay()
+    local lo = BI.opt("VoiceMinSeconds", 2)
+    local hi = BI.opt("VoiceMaxSeconds", 5)
+    if hi < lo then hi = lo end
+    return (lo + ZombRand(0, math.floor((hi - lo) * 10) + 1) / 10) * 60
+end
+
 function ISBesoinIntimeAction:update()
     if self.usesSit then pcall(ActionBase.update, self) end
     self.tick = (self.tick or 0) + 1
+    -- Voix aleatoire (un des clips au hasard) a intervalles aleatoires
+    if BI.opt("VoiceEnabled", true) then
+        self.voiceTimer = (self.voiceTimer or nextVoiceDelay()) - 1
+        if self.voiceTimer <= 0 then
+            BI.playSound(self.character, "BesoinIntime_Voice")
+            self.voiceTimer = nextVoiceDelay()
+        end
+    end
     if self.tick % 60 == 0 and BI.opt("ZombieCheck", true) and BI.zombieNear(self.character) then
         halo(self.character, "IGUI_BesoinIntime_Interrupted", 255, 120, 120)
         self:forceStop()
@@ -271,8 +286,26 @@ local function drawCensorFor(self, player, playerNum)
 end
 
 function BesoinIntimeCensor:render()
-    if not BI.opt("CensorEnabled", true) then return end
     local ok, err = pcall(function()
+        -- Ecran noir pendant l'action (joueur local uniquement)
+        if BI.opt("BlackoutEnabled", true) then
+            local anyLocal = false
+            for _, on in pairs(BI.activeLocal) do if on then anyLocal = true end end
+            if anyLocal then
+                local a = BI.opt("BlackoutAlpha", 1.0)
+                self:drawRect(0, 0, getCore():getScreenWidth(), getCore():getScreenHeight(), a, 0, 0, 0)
+                local msg = BI.T("IGUI_BesoinIntime_Started")
+                local tw = getTextManager():MeasureStringX(UIFont.Medium, msg)
+                self:drawText(msg, getCore():getScreenWidth() / 2 - tw / 2, getCore():getScreenHeight() / 2 - 10, 0.85, 0.75, 0.95, 1, UIFont.Medium)
+            end
+        end
+    end)
+    if not ok and not self.loggedErr2 then
+        self.loggedErr2 = true
+        print("[BesoinIntime] blackout render error: " .. tostring(err))
+    end
+    if not BI.opt("CensorEnabled", true) then return end
+    ok, err = pcall(function()
         for num, on in pairs(BI.activeLocal) do
             if on then drawCensorFor(self, getSpecificPlayer(num), num) end
         end
@@ -551,6 +584,20 @@ local function onServerCommand(module, command, args)
     end
 end
 Events.OnServerCommand.Add(onServerCommand)
+
+-- Voix des joueurs distants en action (chaque client tire ses propres delais)
+Events.OnTick.Add(function()
+    if not BI.opt("VoiceEnabled", true) then return end
+    for id, info in pairs(BI.activeRemote) do
+        if info.player and not info.player:isDead() then
+            info.voiceTimer = (info.voiceTimer or nextVoiceDelay()) - 1
+            if info.voiceTimer <= 0 then
+                BI.playSound(info.player, "BesoinIntime_Voice")
+                info.voiceTimer = nextVoiceDelay()
+            end
+        end
+    end
+end)
 
 -- ---------------------------------------------------------------------------
 -- Tick 10 minutes de jeu + creation du panneau
