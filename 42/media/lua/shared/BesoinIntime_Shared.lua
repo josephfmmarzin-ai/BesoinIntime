@@ -4,7 +4,7 @@
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "3.3.0"
+BI.VERSION   = "3.4.0"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
 BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'a la fin de la serenite
@@ -495,13 +495,28 @@ function BI.applyRelief(player, withPartner, bedQuality)
 end
 
 -- Sons (client) : boucle pendant l'action, son final au soulagement
+BI.VOICES = { "BesoinIntime_Voice1", "BesoinIntime_Voice2", "BesoinIntime_Voice3" }
+
 function BI.playSound(player, name)
     if not BI.opt("SoundEnabled", true) then return nil end
     local id = nil
-    pcall(function()
+    local ok, err = pcall(function()
         local em = player:getEmitter()
         if em then id = em:playSound(name) end
+        if not id and player.playSound then id = player:playSound(name) end
     end)
+    if not ok then print("[BesoinIntime] playSound error: " .. tostring(err)) end
+    return id
+end
+
+-- Joue un des clips de voix au hasard
+function BI.playVoice(player)
+    local name = BI.VOICES[ZombRand(#BI.VOICES) + 1]
+    local id = BI.playSound(player, name)
+    if not BI.voiceLogged then
+        BI.voiceLogged = true
+        print("[BesoinIntime] voice play: " .. tostring(name) .. " id=" .. tostring(id))
+    end
     return id
 end
 

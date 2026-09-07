@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 3.3.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
+-- Besoin Intime 3.4.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -71,7 +71,7 @@ function ISBesoinIntimeAction:update()
     if BI.opt("VoiceEnabled", true) then
         self.voiceTimer = (self.voiceTimer or nextVoiceDelay()) - 1
         if self.voiceTimer <= 0 then
-            BI.playSound(self.character, "BesoinIntime_Voice")
+            BI.playVoice(self.character)
             self.voiceTimer = nextVoiceDelay()
         end
     end
@@ -83,13 +83,12 @@ end
 
 function ISBesoinIntimeAction:start()
     if self.usesSit then pcall(ActionBase.start, self) end
-    self.loopSound = BI.playSound(self.character, "BesoinIntime_Moment")
+    self.voiceTimer = 30
     BI.setActive(self.character, true)
     halo(self.character, "IGUI_BesoinIntime_Started", 220, 180, 255)
 end
 
 function ISBesoinIntimeAction:stop()
-    BI.stopSound(self.character, self.loopSound)
     BI.setActive(self.character, false)
     if self.usesSit then
         pcall(ActionBase.stop, self)
@@ -99,10 +98,9 @@ function ISBesoinIntimeAction:stop()
 end
 
 function ISBesoinIntimeAction:perform()
-    BI.stopSound(self.character, self.loopSound)
     BI.setActive(self.character, false, true)
     BI.applyRelief(self.character, self.withPartner, self.bedQuality)
-    BI.playSound(self.character, "BesoinIntime_Relief")
+    BI.playVoice(self.character)
     if self.usesSit then
         pcall(ActionBase.perform, self)
     else
@@ -562,14 +560,9 @@ local function onServerCommand(module, command, args)
         pcall(function() pl = getPlayerByOnlineID(args.id) end)
         if pl and pl ~= player then
             if args.active then
-                local snd = BI.playSound(pl, "BesoinIntime_Moment")
-                BI.activeRemote[args.id] = { player = pl, sound = snd }
+                BI.activeRemote[args.id] = { player = pl, voiceTimer = 30 }
             else
-                local info = BI.activeRemote[args.id]
-                if info then
-                    BI.stopSound(pl, info.sound)
-                    if args.relieved then BI.playSound(pl, "BesoinIntime_Relief") end
-                end
+                if BI.activeRemote[args.id] and args.relieved then BI.playVoice(pl) end
                 BI.activeRemote[args.id] = nil
             end
         end
@@ -592,7 +585,7 @@ Events.OnTick.Add(function()
         if info.player and not info.player:isDead() then
             info.voiceTimer = (info.voiceTimer or nextVoiceDelay()) - 1
             if info.voiceTimer <= 0 then
-                BI.playSound(info.player, "BesoinIntime_Voice")
+                BI.playVoice(info.player)
                 info.voiceTimer = nextVoiceDelay()
             end
         end
