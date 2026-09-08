@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Besoin Intime 3.4.0 - action, menu contextuel, panneau, multijoueur (client) - Build 42
+-- Besoin Intime 3.4.1 - action, menu contextuel, panneau, multijoueur (client) - Build 42
 -- ===========================================================================
 require "BesoinIntime_Shared"
 require "TimedActions/ISBaseTimedAction"
@@ -57,8 +57,10 @@ function ISBesoinIntimeAction:waitToStart()
     return false
 end
 
+-- Delai (en ticks) avant le prochain clip : jamais inferieur a la duree d'un
+-- clip, pour qu'ils ne se superposent jamais.
 local function nextVoiceDelay()
-    local lo = BI.opt("VoiceMinSeconds", 2)
+    local lo = math.max(BI.opt("VoiceMinSeconds", 2), BI.VOICE_MAX_LEN + 0.2)
     local hi = BI.opt("VoiceMaxSeconds", 5)
     if hi < lo then hi = lo end
     return (lo + ZombRand(0, math.floor((hi - lo) * 10) + 1) / 10) * 60
@@ -71,7 +73,7 @@ function ISBesoinIntimeAction:update()
     if BI.opt("VoiceEnabled", true) then
         self.voiceTimer = (self.voiceTimer or nextVoiceDelay()) - 1
         if self.voiceTimer <= 0 then
-            BI.playVoice(self.character)
+            BI.playVoice(self.character, self)
             self.voiceTimer = nextVoiceDelay()
         end
     end
@@ -100,7 +102,7 @@ end
 function ISBesoinIntimeAction:perform()
     BI.setActive(self.character, false, true)
     BI.applyRelief(self.character, self.withPartner, self.bedQuality)
-    BI.playVoice(self.character)
+    BI.playVoice(self.character, self)
     if self.usesSit then
         pcall(ActionBase.perform, self)
     else
@@ -562,7 +564,7 @@ local function onServerCommand(module, command, args)
             if args.active then
                 BI.activeRemote[args.id] = { player = pl, voiceTimer = 30 }
             else
-                if BI.activeRemote[args.id] and args.relieved then BI.playVoice(pl) end
+                if BI.activeRemote[args.id] and args.relieved then BI.playVoice(pl, BI.activeRemote[args.id]) end
                 BI.activeRemote[args.id] = nil
             end
         end
@@ -585,7 +587,7 @@ Events.OnTick.Add(function()
         if info.player and not info.player:isDead() then
             info.voiceTimer = (info.voiceTimer or nextVoiceDelay()) - 1
             if info.voiceTimer <= 0 then
-                BI.playVoice(info.player)
+                BI.playVoice(info.player, info)
                 info.voiceTimer = nextVoiceDelay()
             end
         end

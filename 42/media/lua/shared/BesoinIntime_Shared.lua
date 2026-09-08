@@ -4,7 +4,7 @@
 BesoinIntime = BesoinIntime or {}
 local BI = BesoinIntime
 
-BI.VERSION   = "3.4.0"
+BI.VERSION   = "3.4.1"
 BI.MODULE    = "BesoinIntime"
 BI.KEY       = "BesoinIntime_Need"        -- jauge 0..100
 BI.KEY_CALM  = "BesoinIntime_CalmUntil"   -- heures-monde jusqu'a la fin de la serenite
@@ -509,9 +509,24 @@ function BI.playSound(player, name)
     return id
 end
 
--- Joue un des clips de voix au hasard
-function BI.playVoice(player)
-    local name = BI.VOICES[ZombRand(#BI.VOICES) + 1]
+-- Duree maximale d'un clip (secondes) : sert a ne jamais en superposer deux
+BI.VOICE_MAX_LEN = 1.8
+
+-- Joue un clip de voix au hasard, toujours different du precedent.
+-- "state" est une table (action ou joueur distant) qui memorise le dernier clip.
+function BI.playVoice(player, state)
+    state = state or {}
+    local n = #BI.VOICES
+    local idx
+    if n <= 1 or not state.lastVoice then
+        idx = ZombRand(n) + 1
+    else
+        -- Tirage parmi les n-1 clips restants (exclut le precedent)
+        idx = ZombRand(n - 1) + 1
+        if idx >= state.lastVoice then idx = idx + 1 end
+    end
+    state.lastVoice = idx
+    local name = BI.VOICES[idx]
     local id = BI.playSound(player, name)
     if not BI.voiceLogged then
         BI.voiceLogged = true
